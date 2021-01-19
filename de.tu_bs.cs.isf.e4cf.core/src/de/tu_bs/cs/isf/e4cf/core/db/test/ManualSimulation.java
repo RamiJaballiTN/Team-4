@@ -82,7 +82,9 @@ public class ManualSimulation {
 		
 		//ds.deleteData(_DATABASEPATH, _DATABASENAME, _TABLEENAME, dc);
 		
-		ds.selectData(_DATABASEPATH, _DATABASENAME, _TABLEENAME, null, sort, null);
+		//ds.selectData(_DATABASEPATH, _DATABASENAME, _TABLEENAME, null, sort, null);
+		ds.count(_DATABASEPATH, _DATABASENAME, _TABLEENAME, cd,null, c3.getName());
+		ds.distinctcount(_DATABASEPATH, _DATABASENAME, _TABLEENAME, cd, null, c3.getName());
 		
 
 	}

@@ -93,9 +93,45 @@ public class DataServiceImp extends DataUtilities implements IDataService {
 		return 0;
 	}
 	
-	public long count(final String pPath, final String pDbName, final String pTableName, Condition condition,
-			Sorting sorting, final String... attributes) {
-		return 0;
+	public long distinctcount(final String pPath, final String pDbName, final String pTableName, Condition condition,
+			Sorting sorting, final String attributes) throws SQLException {
+	      return makecount(pPath, pDbName, pTableName, condition, sorting, attributes, true);
 	}
+	
+	public long count(final String pPath, final String pDbName, final String pTableName, Condition condition,
+			Sorting sorting, final String attributes) throws SQLException {
+	      return makecount(pPath, pDbName, pTableName, condition, sorting, attributes, false);
+	}
+	
+	public long makecount(final String pPath, final String pDbName, final String pTableName, Condition condition,
+			Sorting sorting, final String attributes, boolean distinct) throws SQLException {
+		final Connection con = DatabaseFactory.getInstance().getDatabase(pPath, pDbName);
+		final Statement stm = con.createStatement();
+		String sqlStatement = "";
+		String attributs = "", conditions = "", sortings = "";
+		if (null == attributes || attributes.length() == 0) {
+			attributs = "*";
+		} 
+		if (null != condition) {
+			conditions = condition.getConditionAsSql();
+		}
+		if (null != sorting) {
+			sortings = sorting.getSortingAsSql();
+		}
+		if(distinct) {
+			 sqlStatement = "SELECT " + "COUNT(DISTINCT " + attributes +") " + " AS " + attributes +"_num" + " FROM " + pTableName + " " + conditions + sortings;
+		} else {
+		     sqlStatement = "SELECT " + "COUNT(" + attributes +") " + " AS " + attributes +"_num" + " FROM " + pTableName + " " + conditions + sortings;
+		}
+		System.out.println("Test Select: " + sqlStatement);
+		ResultSet rs = stm.executeQuery(sqlStatement);
+		long countnum = rs.getLong(attributes+ "_num");
+		System.out.println("Test Select: " + countnum);
+		con.close();
+		return countnum;
+	}
+	
+	
+	
 
 }

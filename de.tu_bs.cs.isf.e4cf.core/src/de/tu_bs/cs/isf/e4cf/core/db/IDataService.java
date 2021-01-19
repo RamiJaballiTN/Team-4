@@ -30,7 +30,7 @@ public interface IDataService {
 	 * @param data
 	 * @throws SQLException
 	 */
-	void updateData(String pPath, String pDbName, String pTableName, Condition condition, ColumnValue... data)
+	public void updateData(String pPath, String pDbName, String pTableName, Condition condition, ColumnValue... data)
 			throws SQLException;
 
 	/**
@@ -57,4 +57,33 @@ public interface IDataService {
 	 */
 	public ResultSet selectData(String pPath, String pDbName, String pTableName, Condition condition, Sorting sorting,
 			String... attributes) throws SQLException;
+
+  /**
+   * Method to get the number of rows in a given column(all NOT NULL and unique value£©
+   * @param pPath
+   * @param pDbName
+   * @param pTableName
+   * @param condition
+   * @param sorting
+   * @param attributes
+   * @return
+   * @throws SQLException
+   */
+    public long distinctcount(final String pPath, final String pDbName, final String pTableName, Condition condition,
+		    Sorting sorting, final String attributes) throws SQLException ;
+     
+    /**
+     *Method to get the number of rows in a given column(all NOT NULL-value£©
+     * @param pPath
+     * @param pDbName
+     * @param pTableName
+     * @param condition
+     * @param sorting
+     * @param attributes
+     * @return
+     * @throws SQLException
+     */
+    public long count(final String pPath, final String pDbName, final String pTableName, Condition condition,
+		   Sorting sorting, final String attributes) throws SQLException ;
+     
 }
