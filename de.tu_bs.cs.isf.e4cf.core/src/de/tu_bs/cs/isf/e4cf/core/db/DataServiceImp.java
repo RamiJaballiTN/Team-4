@@ -89,8 +89,42 @@ public class DataServiceImp extends DataUtilities implements IDataService {
 	}
 
 	public long summe(final String pPath, final String pDbName, final String pTableName, Condition condition,
-			Sorting sorting, final String... attributes) {
-		return 0;
+			Sorting sorting, final String attributes) throws SQLException {
+		return makesum(pPath, pDbName, pTableName, condition, sorting, attributes, false);
+	}
+	
+	
+	public long distinctsumme(final String pPath, final String pDbName, final String pTableName, Condition condition,
+			Sorting sorting, final String attributes) throws SQLException {
+		return makesum(pPath, pDbName, pTableName, condition, sorting, attributes, true);
+	}
+	
+	public long makesum(final String pPath, final String pDbName, final String pTableName, Condition condition,
+			Sorting sorting, final String attributes, boolean isdistinct) throws SQLException {
+		final Connection con = DatabaseFactory.getInstance().getDatabase(pPath, pDbName);
+		final Statement stm = con.createStatement();
+		String sqlStatement = "";
+		String attributs = "", conditions = "", sortings = "";
+		if (null == attributes || attributes.length() == 0) {
+			attributs = "*";
+		} 
+		if (null != condition) {
+			conditions = condition.getConditionAsSql();
+		}
+		if (null != sorting) {
+			sortings = sorting.getSortingAsSql();
+		}
+		if(isdistinct) {
+			sqlStatement = "SELECT " + "SUM(DISTINCT " + attributes +") " + " AS " + attributes +"_num" + " FROM " + pTableName + " " + conditions + sortings;
+		}else {
+			sqlStatement = "SELECT " + "SUM(" + attributes +") " + " AS " + attributes +"_num" + " FROM " + pTableName + " " + conditions + sortings;
+		}
+		System.out.println("Test Select: " + sqlStatement);
+		ResultSet rs = stm.executeQuery(sqlStatement);
+		long countnum = rs.getLong(attributes+ "_num");
+		System.out.println("Test Select: " + countnum);
+		con.close();
+		return countnum;
 	}
 	
 	public long distinctcount(final String pPath, final String pDbName, final String pTableName, Condition condition,
