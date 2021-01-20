@@ -60,16 +60,20 @@ public class ManualSimulation {
 		ColumnValue cv1 = new ColumnValue(c2.getName(), new String("Mohamedd ali"));
 		ColumnValue cv2 = new ColumnValue(c3.getName(), 44);
 		
-		//ds.insertData(_DATABASEPATH, _DATABASENAME, _TABLEENAME, cv1, cv2);
+		
 		
 		ColumnValue cvv = new ColumnValue(c1.getName(), new Integer(1111));
 		ColumnValue cv3 = new ColumnValue(c2.getName(), "Rami ");
 		ColumnValue cv4 = new ColumnValue(c3.getName(), 48);
+		ColumnValue cv5 = new ColumnValue(c2.getName(),"Mohamedd ali");
 		
+		//ds.insertData(_DATABASEPATH, _DATABASENAME, _TABLEENAME, cv1, cv2);
 		//ds.insertData(_DATABASEPATH, _DATABASENAME, _TABLEENAME, cv3, cv4);
-		//ds.printTable(_DATABASEPATH, _DATABASENAME, _TABLEENAME);
+		//ds.insertData(_DATABASEPATH, _DATABASENAME, _TABLEENAME, cv1, cv4);
+		//ds.insertData(_DATABASEPATH, _DATABASENAME, _TABLEENAME, cv3, cv2);
+		ds.printTable(_DATABASEPATH, _DATABASENAME, _TABLEENAME);
 		
-		Condition cd = new AndCondition(cv4);
+		Condition cd = new AndCondition(cv3);
 		
 		ColumnValue cvn = new ColumnValue(c2.getName(), "John Q");
 		ColumnValue cvn2 = new ColumnValue(c3.getName(), 20);
@@ -83,9 +87,9 @@ public class ManualSimulation {
 		//ds.deleteData(_DATABASEPATH, _DATABASENAME, _TABLEENAME, dc);
 		
 		//ds.selectData(_DATABASEPATH, _DATABASENAME, _TABLEENAME, null, sort, null);
-		ds.count(_DATABASEPATH, _DATABASENAME, _TABLEENAME, cd,null, c3.getName());
-		ds.distinctcount(_DATABASEPATH, _DATABASENAME, _TABLEENAME, cd, null, c3.getName());
-		
+		//ds.count(_DATABASEPATH, _DATABASENAME, _TABLEENAME, cd,null, c3.getName());
+		//ds.distinctcount(_DATABASEPATH, _DATABASENAME, _TABLEENAME, cd, null, c3.getName());
+		ds.summe(_DATABASEPATH, _DATABASENAME, _TABLEENAME, cd, null,c3.getName());
 
 	}
 
