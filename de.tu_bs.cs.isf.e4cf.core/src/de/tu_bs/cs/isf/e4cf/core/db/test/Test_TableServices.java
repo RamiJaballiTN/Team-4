@@ -13,6 +13,11 @@ import de.tu_bs.cs.isf.e4cf.core.db.DatabaseFactory;
 import de.tu_bs.cs.isf.e4cf.core.db.TableServiceImp;
 import de.tu_bs.cs.isf.e4cf.core.db.model.Column;
 
+/**
+ * 
+ * JUnitstests for tables management.
+ *
+ */
 class Test_TableServices {
 
 	private final String _PATHTESTDATABASES = "./testDatabases/";

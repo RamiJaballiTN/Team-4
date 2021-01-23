@@ -1,5 +1,10 @@
 package de.tu_bs.cs.isf.e4cf.core.db.model;
 
+/**
+ * 
+ * The class wich stands for the sorting condition in an sql statement.
+ *
+ */
 public class Sorting {
 
 	private Condition groupCondition = null;
@@ -37,8 +42,8 @@ public class Sorting {
 				orderSql += c.getColumnName() + ", ";
 			}
 			orderSql = orderSql.substring(0, orderSql.length() - 2);
-			if (orderType != null) {
-				orderSql += " "+orderType;
+			if (null != orderType) {
+				orderSql += " " + orderType;
 			}
 		}
 

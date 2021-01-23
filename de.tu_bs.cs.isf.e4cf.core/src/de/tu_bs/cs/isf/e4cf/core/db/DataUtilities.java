@@ -14,18 +14,21 @@ public class DataUtilities {
 	 * @param pDbName   String the name of the database
 	 * @param tableName String name of the table
 	 * @return int Number of rowd in the table
-	 * @throws SQLException
 	 */
-	public int getTableNumberRows(final String pPath, final String pDbName, final String pTableName)
-			throws SQLException {
+	public int getTableNumberRows(final String pPath, final String pDbName, final String pTableName) {
 		final Connection con = DatabaseFactory.getInstance().getDatabase(pPath, pDbName);
-		Statement stm = con.createStatement();
-		ResultSet rs = stm.executeQuery("SELECT * FROM " + pTableName);
 		int rowcounts = 0;
-		while (rs.next()) {
-			rowcounts++;
+		try {
+			final Statement stm = con.createStatement();
+			final ResultSet rs = stm.executeQuery("SELECT * FROM " + pTableName);
+			rowcounts = 0;
+			while (rs.next()) {
+				rowcounts++;
+			}
+			con.close();
+		} catch (SQLException e) {
+			System.err.println(e.getMessage());
 		}
-		con.close();
 		return rowcounts;
 	}
 
@@ -46,20 +49,8 @@ public class DataUtilities {
 	}
 
 	/**
-	 * Method to check if a table has data.
-	 * 
-	 * @param pPath     String the path of the database
-	 * @param pDbName   String the name of the database
-	 * @param tableName String name of the table
-	 * @return boolean
-	 */
-	public boolean tableHasData(final String pPath, final String pDbName, final String pTableName) {
-		return false;
-	}
-
-	/**
-	 * Method to get the number of rows in a ResultSet.
-	 * There is no defined method for it.
+	 * Method to get the number of rows in a ResultSet. There is no defined method
+	 * for it.
 	 * 
 	 * @param rs ResultSet
 	 * @return int number of rows
@@ -95,7 +86,7 @@ public class DataUtilities {
 	/**
 	 * Method to get the separation line (+---+---+---+)
 	 * 
-	 * @param stm 
+	 * @param stm
 	 * @param sqlStatement
 	 * @return
 	 * @throws SQLException
@@ -119,11 +110,11 @@ public class DataUtilities {
 		}
 		return line;
 	}
-	
+
 	/**
 	 * Method to get the header of a table.
 	 * 
-	 * @param stm 
+	 * @param stm
 	 * @param sqlStatement
 	 * @return
 	 * @throws SQLException
@@ -134,7 +125,8 @@ public class DataUtilities {
 		int colNow = 1;
 		int l = 0;
 		while (l < getSeparationLine(stm, sqlStatement).length() - 1) {
-			if (getSeparationLine(stm, sqlStatement).charAt(l) == '+' && l != getSeparationLine(stm, sqlStatement).length() - 1) {
+			if (getSeparationLine(stm, sqlStatement).charAt(l) == '+'
+					&& l != getSeparationLine(stm, sqlStatement).length() - 1) {
 				colLine += "| " + rs.getMetaData().getColumnName(colNow) + " ";
 				l += 3 + rs.getMetaData().getColumnName(colNow).length();
 				colNow++;
@@ -146,11 +138,11 @@ public class DataUtilities {
 		colLine += "|";
 		return colLine;
 	}
-	
+
 	/**
 	 * Method to print the data of a table.
 	 * 
-	 * @param stm 
+	 * @param stm
 	 * @param sqlStatement
 	 * @return
 	 * @throws SQLException

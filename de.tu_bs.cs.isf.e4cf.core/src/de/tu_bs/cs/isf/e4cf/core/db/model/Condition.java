@@ -3,12 +3,17 @@ package de.tu_bs.cs.isf.e4cf.core.db.model;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 
+ * The class wich stands for the where condition in an sql statement.
+ *
+ */
 public class Condition {
 
 	private List<ColumnValue> columnValuesList;
 	private String type;
 
-	public Condition(ColumnValue... columnValues) {
+	protected Condition(ColumnValue... columnValues) {
 		List<ColumnValue> columnVa = new ArrayList<>();
 		for (ColumnValue c : columnValues) {
 			columnVa.add(c);
@@ -16,7 +21,7 @@ public class Condition {
 		columnValuesList = columnVa;
 	}
 
-	public Condition(String type, ColumnValue... columnValues) {
+	protected Condition(String type, ColumnValue... columnValues) {
 		List<ColumnValue> columnVa = new ArrayList<>();
 		for (ColumnValue c : columnValues) {
 			columnVa.add(c);
@@ -34,15 +39,6 @@ public class Condition {
 			columnValuesList.add(c);
 		}
 
-	}
-
-	public String default_Condition(Condition condi) {
-		String conditionsql = " WHERE ";
-		for (ColumnValue c : condi.columnValuesList) {
-			conditionsql += c.getColumnName() + " = " + c.getValue();
-		}
-		conditionsql += ";";
-		return conditionsql;
 	}
 
 	public String getConditionAsSql() {

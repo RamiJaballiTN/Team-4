@@ -1,5 +1,10 @@
 package de.tu_bs.cs.isf.e4cf.core.db.model;
 
+/**
+ * 
+ * Class that represents the column in a table.
+ *
+ */
 public class Column {
 
 	private String name;

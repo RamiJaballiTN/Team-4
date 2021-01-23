@@ -23,17 +23,42 @@ public class TableUtilities {
 	 * @return boolean
 	 * @throws SQLException
 	 */
-	public boolean tableExists(final String pPath, final String pDbName, final String tableName) throws SQLException {
+	public boolean tableExists(final String pPath, final String pDbName, final String tableName) {
 		final Connection con = DatabaseFactory.getInstance().getDatabase(pPath, pDbName);
-		final ResultSet rs = con.getMetaData().getTables(null, null, null, null);
-		while (rs.next()) {
-			if (tableName.equals(rs.getString("TABLE_NAME"))) {
-				con.close();
-				return true;
+		try {
+			final ResultSet rs = con.getMetaData().getTables(null, null, null, null);
+			while (rs.next()) {
+				if (tableName.equals(rs.getString("TABLE_NAME"))) {
+					con.close();
+					return true;
+				}
 			}
+			con.close();
+		} catch (SQLException e) {
+			System.err.println("Error while getting tables. " + e.getMessage());
+		}
+		return false;
+	}
+
+	/**
+	 * Method to check if a table has data.
+	 * 
+	 * @param pPath     String the path of the database
+	 * @param pDbName   String the name of the database
+	 * @param tableName String name of the table
+	 * @return boolean
+	 * @throws SQLException
+	 */
+	public boolean tableHasData(final String pPath, final String pDbName, final String pTableName) throws SQLException {
+		final Connection con = DatabaseFactory.getInstance().getDatabase(pPath, pDbName);
+		final Statement stm = con.createStatement();
+		ResultSet rs = stm.executeQuery("SELECT * FROM " + pTableName);
+		int rowcounts = 0;
+		while (rs.next()) {
+			rowcounts++;
 		}
 		con.close();
-		return false;
+		return rowcounts > 0;
 	}
 
 	/**
@@ -91,87 +116,94 @@ public class TableUtilities {
 	 * @param tableName  String name of the table
 	 * @param columnName String name of the column
 	 * @return List<String> list of the primary key in the Table
-	 * @throws SQLException
 	 */
-	public List<String> getPrimaryKeyTable(final String pPath, final String pDbName, final String tableName)
-			throws SQLException {
+	public List<String> getPrimaryKeyTable(final String pPath, final String pDbName, final String tableName) {
 		final Connection con = DatabaseFactory.getInstance().getDatabase(pPath, pDbName);
-		final ResultSet rs = con.getMetaData().getPrimaryKeys(null, null, tableName);
 		List<String> primarykeyList = new ArrayList<>();
-		while (rs.next()) {
-			String primarykey = rs.getString("COLUMN_NAME");
-			primarykeyList.add(primarykey);
+		try {
+			final ResultSet rs = con.getMetaData().getPrimaryKeys(null, null, tableName);
+			primarykeyList = new ArrayList<>();
+			while (rs.next()) {
+				String primarykey = rs.getString("COLUMN_NAME");
+				primarykeyList.add(primarykey);
+			}
+		} catch (SQLException e) {
+			System.err.println("Error while getting table metadata.");
 		}
 		return Collections.unmodifiableList(primarykeyList);
 	}
 
 	/**
-	 * Method to get the unique constraints of a Table
+	 * Method to get the unique constraints of a Table.
 	 * 
 	 * @param pPath      String the path of the database
 	 * @param pDbName    String the name of the database
 	 * @param tableName  String name of the table
 	 * @param columnName String name of the column
 	 * @return List<String> list of the unique keys in the Table
-	 * @throws SQLException
 	 */
-	public List<String> getUniqueKeyTable(final String pPath, final String pDbName, final String tableName)
-			throws SQLException {
+	public List<String> getUniqueKeyTable(final String pPath, final String pDbName, final String tableName) {
 		final Connection con = DatabaseFactory.getInstance().getDatabase(pPath, pDbName);
-		final ResultSet rs = con.getMetaData().getIndexInfo(null, null, tableName, true, false);
 		List<String> uniquekeyList = new ArrayList<>();
-		while (rs.next()) {
-			String unique = rs.getString("COLUMN_NAME");
-			uniquekeyList.add(unique);
+		try {
+			final ResultSet rs = con.getMetaData().getIndexInfo(null, null, tableName, true, false);
+			while (rs.next()) {
+				String unique = rs.getString("COLUMN_NAME");
+				uniquekeyList.add(unique);
+			}
+		} catch (SQLException e) {
+			System.err.println("Error while getting table metadata.");
 		}
 		return Collections.unmodifiableList(uniquekeyList);
 	}
 
 	/**
-	 * Method to get column metadata
+	 * Method to get column metadata.
 	 *
 	 * @param pPath     String the path of the database
 	 * @param pDbName   String the name of the database
 	 * @param tableName String name of the table
-	 * @return List<String> list of the column metadata in the database
-	 * @throws SQLException
+	 * @return List<Column> list of the column in the database
 	 */
-	public List<Column> getColumnsTable(final String pPath, final String pDbName, final String tableName)
-			throws SQLException {
+	public List<Column> getColumnsTable(final String pPath, final String pDbName, final String pTableName) {
 		final Connection con = DatabaseFactory.getInstance().getDatabase(pPath, pDbName);
 		List<Column> columns = new ArrayList<>();
-		final String sql = "select * from " + tableName + " LIMIT 0";
-		final Statement statement = con.createStatement();
-		final ResultSet rs = statement.executeQuery(sql);
-		final ResultSetMetaData mrs = rs.getMetaData();
-		final List<String> primaryKeySet = getPrimaryKeyTable(pPath, pDbName, tableName);
-		final List<String> uniqueKeySet = getUniqueKeyTable(pPath, pDbName, tableName);
-		
-		for (int i = 1; i <= mrs.getColumnCount(); i++) {
-			Column c = new Column(mrs.getColumnLabel(i), mrs.getColumnTypeName(i));
-			c.setPrimaryKey(primaryKeySet.contains(mrs.getColumnLabel(i)));
-			c.setUnique(uniqueKeySet.contains(mrs.getColumnLabel(i)));
-			c.setAutoIncrement(mrs.isAutoIncrement(i));
-			columns.add(c);
+		try {
+			final String sql = "select * from " + pTableName + " LIMIT 0";
+			final Statement statement = con.createStatement();
+			final ResultSet rs = statement.executeQuery(sql);
+			final ResultSetMetaData mrs = rs.getMetaData();
+			final List<String> primaryKeySet = getPrimaryKeyTable(pPath, pDbName, pTableName);
+			final List<String> uniqueKeySet = getUniqueKeyTable(pPath, pDbName, pTableName);
+
+			for (int i = 1; i <= mrs.getColumnCount(); i++) {
+				Column c = new Column(mrs.getColumnLabel(i), mrs.getColumnTypeName(i));
+				c.setPrimaryKey(primaryKeySet.contains(mrs.getColumnLabel(i)));
+				c.setUnique(uniqueKeySet.contains(mrs.getColumnLabel(i)));
+				c.setAutoIncrement(mrs.isAutoIncrement(i));
+				columns.add(c);
+			}
+
+			DatabaseMetaData meta = con.getMetaData();
+			ResultSet rs_columns = meta.getColumns(null, null, pTableName, null);
+			while (rs_columns.next()) {
+				String columnName = rs_columns.getString(4);
+				String nullable = rs_columns.getString(18);
+				int colSize = columns.size();
+				for (int i = 0; i < colSize; i++) {
+					Column col = columns.get(i);
+					if (col.getName().equals(columnName)) {
+						if (nullable.equals("YES")) {
+							getColumn(columns, col.getName()).setNotNull(false);
+						} else if (nullable.equals("NO")) {
+							getColumn(columns, col.getName()).setNotNull(true);
+						}
+					}
+				}
+			}
+		} catch (SQLException e) {
+			System.err.println("Error while getting table metadata.");
 		}
-		
-		DatabaseMetaData meta = con.getMetaData();               
-	    ResultSet rs_columns = meta.getColumns(null, null, tableName, null);                    
-	    while(rs_columns.next()) {
-	        String columnName = rs_columns.getString(4);
-	        String nullable = rs_columns.getString(18);
-	        int colSize = columns.size();
-	        for(int i = 0; i < colSize; i++) {
-	        	Column col = columns.get(i);
-	        	if(col.getName().equals(columnName)) {
-	        		if(nullable.equals("YES")) {
-	        			getColumn(columns, col.getName()).setNotNull(false);
-	        		} else if (nullable.equals("NO")) {
-	        			getColumn(columns, col.getName()).setNotNull(true);
-	        		}
-	        	}
-	        }
-	    }
 		return Collections.unmodifiableList(columns);
 	}
 
@@ -210,9 +242,8 @@ public class TableUtilities {
 	 * @param tableName  String name of the table
 	 * @param columnName String name of the column
 	 * @return boolean
-	 * @throws SQLException
 	 */
-	public Column getColumn(final List<Column> columnList, final String columnName) throws SQLException {
+	protected Column getColumn(final List<Column> columnList, final String columnName) {
 		for (Column c : columnList) {
 			if (columnName.equals(c.getName())) {
 				return c;

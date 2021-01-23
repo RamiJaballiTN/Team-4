@@ -2,12 +2,18 @@ package de.tu_bs.cs.isf.e4cf.core.db;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
 /**
- * A singleton class to manage databases in the project.
+ * A singleton class to manage databases in the project. By creating a database,
+ * if no path is given the database-file would be put directly under the
+ * Projectpath, else in the given folder (existing file !!).
  * 
  *
  */
@@ -20,19 +26,19 @@ public class DatabaseFactory {
 	 * Constructor
 	 * 
 	 */
-	private DatabaseFactory() {
+	protected DatabaseFactory() {
 		// load JDBC-driver in driver-manager
 		try {
 			Class.forName(_JDBC_DRIVER);
 		} catch (ClassNotFoundException e) {
-			System.out.println(_JDBC_DRIVER + " can not be loaded.");
-			e.printStackTrace();
+			System.err.println("Error while loading JDBC-Driver: " + _JDBC_DRIVER + "." + e.getMessage());
 		}
 	}
 
 	/**
+	 * Methode to get the instance of the class.
 	 * 
-	 * @return ConnectionFactory the instance of the class
+	 * @return ConnectionFactory instance of class
 	 */
 	public synchronized static DatabaseFactory getInstance() {
 		if (null == INSTANCE) {
@@ -50,13 +56,17 @@ public class DatabaseFactory {
 	 * @return Connection
 	 * @throws SQLException error while creating database
 	 */
-	public void createDatabase(final String pPath, final String pDbName) throws SQLException {
+	public void createDatabase(final String pPath, final String pDbName) {
 		if (!databaseExists(pPath, pDbName)) {
-			final Connection con = DriverManager.getConnection("jdbc:sqlite:" + pPath + pDbName);
-			con.close();
-			System.out.println("Database " + pDbName + " created.");
+			try {
+				final Connection con = DriverManager.getConnection("jdbc:sqlite:" + pPath + pDbName);
+				con.close();
+				System.out.println("Database created: " + pDbName);
+			} catch (SQLException e) {
+				System.err.println("Error while creating database: " + pDbName + ". " + e.getMessage());
+			}
 		} else {
-			System.out.println("Database " + pDbName + " already exists.");
+			System.out.println("Database already exists: " + pDbName);
 		}
 	}
 
@@ -66,15 +76,18 @@ public class DatabaseFactory {
 	 * @param pPath   String the path where the database is situated
 	 * @param pDbName String the name of the database
 	 * @return Connection
-	 * @throws SQLException error while getting database
 	 */
-	public Connection getDatabase(final String pPath, final String pDbName) throws SQLException {
+	public Connection getDatabase(final String pPath, final String pDbName) {
 		if (databaseExists(pPath, pDbName)) {
-			return DriverManager.getConnection("jdbc:sqlite:" + pPath + pDbName);
+			try {
+				return DriverManager.getConnection("jdbc:sqlite:" + pPath + pDbName);
+			} catch (SQLException e) {
+				System.err.println("Error while getting database: " + pDbName + ". " + e.getMessage());
+			}
 		} else {
-			System.out.println(pDbName + " database does not exist.");
-			return null;
+			System.out.println("Database does not exist: " + pDbName);
 		}
+		return null;
 	}
 
 	/**
@@ -85,14 +98,12 @@ public class DatabaseFactory {
 	 * @throws SQLException error while deleting database
 	 * @throws IOException
 	 */
-	public void deleteDatabase(final String pPath, final String pDbName) throws SQLException, IOException {
+	public void deleteDatabase(final String pPath, final String pDbName) {
 		if (databaseExists(pPath, pDbName)) {
-			getDatabase(pPath, pDbName).close();
-			final File file = new File(pPath + pDbName);
-			file.delete();
-			System.out.println("Database " + pDbName + " deleted.");
+			new File(pPath + pDbName).delete();
+			System.out.println("Database deleted: " + pDbName);
 		} else {
-			System.out.println(pDbName + " database does not exist.");
+			System.out.println("Database does not exist: " + pDbName);
 		}
 	}
 
@@ -110,7 +121,7 @@ public class DatabaseFactory {
 				System.out.println("Renaming database " + pOldDbName + " to " + pNewDbName);
 			}
 		} else {
-			System.out.println(pOldDbName + " database does not exist.");
+			System.out.println("Database does not exist: " + pOldDbName);
 		}
 	}
 
@@ -124,19 +135,16 @@ public class DatabaseFactory {
 	 */
 	public void moveDatabase(final String pDbName, final String pOldPath, final String pNewPath) {
 		if (databaseExists(pOldPath, pDbName)) {
-			final File startFile = new File(pOldPath + pDbName);
-			final File endDirection = new File(pNewPath);
-			if (!endDirection.exists()) {
-				endDirection.mkdirs();
-			}
-			File endFile = new File(endDirection + File.separator + startFile.getName());
-			if (startFile.renameTo(endFile)) {
-				System.out.println("File moved successfully! Target path£º{" + endFile.getAbsolutePath() + "}");
-			} else {
-				System.out.println("File move failed! Starting path£º{" + startFile.getAbsolutePath() + "}");
+			final Path source = Paths.get(pOldPath + pDbName);
+			final Path newdir = Paths.get(pNewPath);
+			try {
+				Files.move(source, newdir.resolve(source.getFileName()), StandardCopyOption.REPLACE_EXISTING);
+				System.out.println(pDbName + " was moved successfully from " + pOldPath + " to " + pNewPath + ".");
+			} catch (IOException e) {
+				System.err.println("Error while moving database: " + pDbName);
 			}
 		} else {
-			System.out.println(pDbName + " database does not exist.");
+			System.out.println("Database does not exist: " + pDbName);
 		}
 	}
 
@@ -147,7 +155,7 @@ public class DatabaseFactory {
 	 * @param pDbName String the name of the database
 	 * @return boolean database exists or not
 	 */
-	private boolean databaseExists(final String pPath, final String pDbName) {
+	protected boolean databaseExists(final String pPath, final String pDbName) {
 		final File file = new File(pPath + pDbName);
 		return file.exists();
 	}
