@@ -29,7 +29,7 @@ import de.tu_bs.cs.isf.e4cf.core.db.*;
 import de.tu_bs.cs.isf.e4cf.core.db.model.Column;
 
 public final class DatabaseView extends Application {
-	
+
 	@Override
 	public void start(final Stage stage) {
 		stage.setTitle("DB View");
@@ -42,28 +42,30 @@ public final class DatabaseView extends Application {
 		final Label labelTable = new Label("Tabelle auswählen: ");
 		ChoiceBox<String> cbDb = new ChoiceBox<String>();
 		ChoiceBox<String> cbTable = new ChoiceBox<String>();
-		
+
 		final File file = new File("./testDatabases/");
 		final ObservableList<String> dataFiles = FXCollections.observableArrayList(getFiles(file));
-		
-		cbDb.setItems(dataFiles);	
-		
+
+		cbDb.setItems(dataFiles);
+
 		openButton.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(final ActionEvent e) {
 				String selectedDb = cbDb.getSelectionModel().getSelectedItem().toString();
+				File dbFile = new File(selectedDb);
+				List<String> tNames = selectTable(dbFile);
 				System.out.println(selectedDb);
-			}
-		});
-		
-		final ObservableList<String> tableNames = FXCollections.observableArrayList( );
-		cbTable.setItems(tableNames);	
-		openTable.setOnAction(new EventHandler<ActionEvent>() {
-			@Override
-			public void handle(final ActionEvent e) {
-				String selectedTable = cbTable.getSelectionModel().getSelectedItem().toString();
-				System.out.println(selectedTable);
-				//showTable(file, stage, tableName);
+
+				final ObservableList<String> tableNames = FXCollections.observableArrayList(tNames);
+				cbTable.setItems(tableNames);
+				openTable.setOnAction(new EventHandler<ActionEvent>() {
+					@Override
+					public void handle(final ActionEvent e) {
+						String selectedTable = cbTable.getSelectionModel().getSelectedItem().toString();
+						System.out.println(selectedTable);
+						showTable(dbFile, stage, selectedTable);
+					}
+				});
 			}
 		});
 
@@ -91,29 +93,31 @@ public final class DatabaseView extends Application {
 		Application.launch(args);
 	}
 
-	private List<String> getFiles(final File folder) {		
+	private List<String> getFiles(final File folder) {
 		List<String> files = new ArrayList<String>();
-		
+
 		for (final File fileEntry : folder.listFiles()) {
-	        if (fileEntry.isDirectory()) {
-	            getFiles(fileEntry);
-	        } else {
-	            files.add(fileEntry.getName());
-	        }
-	    }
+			if (fileEntry.isDirectory()) {
+				getFiles(fileEntry);
+			} else {
+				files.add(fileEntry.getName());
+			}
+		}
 		return files;
 	}
-	
-	private String selectTable(File file) {
+
+	private List<String> selectTable(File file) {
+		List<String> tables = new ArrayList<String>();
 		try {
 			TableServiceImp tI = new TableServiceImp();
-			List<String> tables = tI.getTables("./testDatabases/", file.getName());
+			tables = tI.getTables("./testDatabases/", file.getName());
+
 		} catch (Exception e) {
 			System.err.println(e);
 		}
-		return "";
+		return tables;
 	}
-	
+
 	private void showTable(File file, Stage stage, String tableName) {
 		try {
 			TableServiceImp tI = new TableServiceImp();
@@ -145,7 +149,6 @@ public final class DatabaseView extends Application {
 			List<StringProperty> myData = new ArrayList<>();
 
 			ResultSet result = dI.selectData("./testDatabases/", file.getName(), tableName, null, null, null);
-			System.out.println(result.isBeforeFirst());
 
 			while (result.next()) {
 				for (int i = 1; i <= cols.size(); i++) {
@@ -158,20 +161,29 @@ public final class DatabaseView extends Application {
 				data.add(j, myData.subList(j * cols.size(), j * cols.size() + cols.size()));
 			}
 
-			/*for (int i = 0; i < myData.size(); i++) {
-				System.out.println(myData.get(i));
-			}
-			System.out.println();
-			for (int i = 0; i < data.size(); i++) {
-				System.out.println(data.get(i));
-			}*/
+			/*
+			 * for (int i = 0; i < myData.size(); i++) { System.out.println(myData.get(i));
+			 * } System.out.println(); for (int i = 0; i < data.size(); i++) {
+			 * System.out.println(data.get(i)); }
+			 */
 
 			table.setItems(data);
+
+			final Button backButton = new Button("Go back");
 
 			tableGridPane.setHgap(6);
 			tableGridPane.setVgap(6);
 			tableGridPane.add(label, 0, 0);
 			tableGridPane.add(table, 0, 1);
+			tableGridPane.add(backButton, 1, 0);
+
+			backButton.setOnAction(new EventHandler<ActionEvent>() {
+				@Override
+				public void handle(final ActionEvent e) {
+					start(stage);
+				}
+			});
+
 			final Pane vbox = new VBox(12);
 			vbox.getChildren().addAll(tableGridPane);
 			vbox.setPadding(new Insets(12, 12, 12, 12));
