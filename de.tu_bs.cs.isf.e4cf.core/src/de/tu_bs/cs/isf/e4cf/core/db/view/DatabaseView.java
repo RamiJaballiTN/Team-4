@@ -1,7 +1,9 @@
 package de.tu_bs.cs.isf.e4cf.core.db.view;
 
 import java.io.File;
+import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -34,7 +36,7 @@ public final class DatabaseView extends Application {
 	public void start(final Stage stage) {
 		stage.setTitle("DB View");
 		stage.setWidth(500);
-		stage.setHeight(350);
+		stage.setHeight(300);
 
 		final Button openButton = new Button("Open Database");
 		final Button openTable = new Button("Open Table");
@@ -54,7 +56,6 @@ public final class DatabaseView extends Application {
 				String selectedDb = cbDb.getSelectionModel().getSelectedItem().toString();
 				File dbFile = new File(selectedDb);
 				List<String> tNames = selectTable(dbFile);
-				System.out.println(selectedDb);
 
 				final ObservableList<String> tableNames = FXCollections.observableArrayList(tNames);
 				cbTable.setItems(tableNames);
@@ -62,8 +63,7 @@ public final class DatabaseView extends Application {
 					@Override
 					public void handle(final ActionEvent e) {
 						String selectedTable = cbTable.getSelectionModel().getSelectedItem().toString();
-						System.out.println(selectedTable);
-						showTable(dbFile, stage, selectedTable);
+						showTable(dbFile, selectedTable);
 					}
 				});
 			}
@@ -72,11 +72,11 @@ public final class DatabaseView extends Application {
 		final GridPane inputGridPane = new GridPane();
 
 		GridPane.setConstraints(labelDb, 0, 0);
-		GridPane.setConstraints(openButton, 1, 2);
+		GridPane.setConstraints(openButton, 1, 1);
 		GridPane.setConstraints(cbDb, 1, 0);
-		GridPane.setConstraints(labelTable, 0, 3);
-		GridPane.setConstraints(openTable, 1, 5);
-		GridPane.setConstraints(cbTable, 1, 4);
+		GridPane.setConstraints(labelTable, 0, 2);
+		GridPane.setConstraints(openTable, 1, 4);
+		GridPane.setConstraints(cbTable, 1, 2);
 		inputGridPane.setHgap(6);
 		inputGridPane.setVgap(6);
 		inputGridPane.getChildren().addAll(labelDb, cbDb, openButton, labelTable, cbTable, openTable);
@@ -118,25 +118,29 @@ public final class DatabaseView extends Application {
 		return tables;
 	}
 
-	private void showTable(File file, Stage stage, String tableName) {
+	private void showTable(File file, String tableName) {
 		try {
 			TableServiceImp tI = new TableServiceImp();
 
-			stage.setWidth(400);
-			stage.setHeight(500);
-			stage.setResizable(true);
+			Stage tableStage = new Stage();
+			tableStage.setWidth(400);
+			tableStage.setHeight(500);
+			tableStage.setTitle(tableName);
+			tableStage.setResizable(true);
 
 			final GridPane tableGridPane = new GridPane();
 
 			List<Column> cols = tI.getColumnsTable("./testDatabases/", file.getName(), tableName);
 			final TableView<List<StringProperty>> table = new TableView<>();
-			DataServiceImp dI = new DataServiceImp();
 
 			final Label label = new Label(tableName);
 			label.setFont(new Font("Arial", 20));
 
 			table.setEditable(false);
 			table.isResizable();
+			table.prefHeightProperty().bind(tableStage.heightProperty());
+			table.prefWidthProperty().bind(tableStage.widthProperty());
+			table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
 			for (int i = 0; i < cols.size(); i++) {
 				TableColumn<List<StringProperty>, String> column = new TableColumn<>(cols.get(i).getName());
@@ -148,12 +152,13 @@ public final class DatabaseView extends Application {
 			final ObservableList<List<StringProperty>> data = FXCollections.observableArrayList();
 			List<StringProperty> myData = new ArrayList<>();
 
-			ResultSet result = dI.selectData("./testDatabases/", file.getName(), tableName, null, null, null);
+			final Connection con = DatabaseFactory.getInstance().getDatabase("./testDatabases/", file.getName());
+			final Statement stm = con.createStatement();
+			ResultSet result = stm.executeQuery("SELECT * FROM " + tableName);
 
 			while (result.next()) {
 				for (int i = 1; i <= cols.size(); i++) {
-					System.out.println(result.getString(i) + " ");
-					myData.add(i - 1, new SimpleStringProperty(result.getString(i)));
+					myData.add(new SimpleStringProperty(result.getString(i)));
 				}
 			}
 
@@ -161,35 +166,18 @@ public final class DatabaseView extends Application {
 				data.add(j, myData.subList(j * cols.size(), j * cols.size() + cols.size()));
 			}
 
-			/*
-			 * for (int i = 0; i < myData.size(); i++) { System.out.println(myData.get(i));
-			 * } System.out.println(); for (int i = 0; i < data.size(); i++) {
-			 * System.out.println(data.get(i)); }
-			 */
-
 			table.setItems(data);
-
-			final Button backButton = new Button("Go back");
 
 			tableGridPane.setHgap(6);
 			tableGridPane.setVgap(6);
-			tableGridPane.add(label, 0, 0);
-			tableGridPane.add(table, 0, 1);
-			tableGridPane.add(backButton, 1, 0);
-
-			backButton.setOnAction(new EventHandler<ActionEvent>() {
-				@Override
-				public void handle(final ActionEvent e) {
-					start(stage);
-				}
-			});
+			tableGridPane.add(table, 0, 0);
 
 			final Pane vbox = new VBox(12);
 			vbox.getChildren().addAll(tableGridPane);
 			vbox.setPadding(new Insets(12, 12, 12, 12));
 
-			stage.setScene(new Scene(vbox));
-			stage.show();
+			tableStage.setScene(new Scene(vbox));
+			tableStage.show();
 
 		} catch (Exception e) {
 			System.err.println(e);
