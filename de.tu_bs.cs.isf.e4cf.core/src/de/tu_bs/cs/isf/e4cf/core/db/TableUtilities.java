@@ -12,6 +12,12 @@ import java.util.List;
 
 import de.tu_bs.cs.isf.e4cf.core.db.model.Column;
 
+/**
+ * 
+ * A helper class for more organisation. It contains methods for the
+ * implementation of the tables logic. It is also used for the JUnittests.
+ *
+ */
 public class TableUtilities {
 
 	/**
@@ -24,18 +30,14 @@ public class TableUtilities {
 	 * @throws SQLException
 	 */
 	public boolean tableExists(final String pPath, final String pDbName, final String tableName) {
-		final Connection con = DatabaseFactory.getInstance().getDatabase(pPath, pDbName);
 		try {
-			final ResultSet rs = con.getMetaData().getTables(null, null, null, null);
-			while (rs.next()) {
-				if (tableName.equals(rs.getString("TABLE_NAME"))) {
-					con.close();
+			for (final String str :  getTables(pPath, pDbName)) {
+				if (str.equals(tableName)) {
 					return true;
 				}
 			}
-			con.close();
 		} catch (SQLException e) {
-			System.err.println("Error while getting tables. " + e.getMessage());
+			System.err.println(Messages._ER_GT_TB_METADT + e.getMessage());
 		}
 		return false;
 	}
@@ -102,7 +104,7 @@ public class TableUtilities {
 				}
 			}
 		} else {
-			System.out.println("Table " + tableName + " does not exist.");
+			System.out.println(Messages._TB_NO_EX + tableName);
 		}
 		con.close();
 		return false;
@@ -128,7 +130,7 @@ public class TableUtilities {
 				primarykeyList.add(primarykey);
 			}
 		} catch (SQLException e) {
-			System.err.println("Error while getting table metadata.");
+			System.err.println(Messages._ER_GT_TB_METADT);
 		}
 		return Collections.unmodifiableList(primarykeyList);
 	}
@@ -152,7 +154,7 @@ public class TableUtilities {
 				uniquekeyList.add(unique);
 			}
 		} catch (SQLException e) {
-			System.err.println("Error while getting table metadata.");
+			System.err.println(Messages._ER_GT_TB_METADT);
 		}
 		return Collections.unmodifiableList(uniquekeyList);
 	}
@@ -202,7 +204,7 @@ public class TableUtilities {
 				}
 			}
 		} catch (SQLException e) {
-			System.err.println("Error while getting table metadata.");
+			System.err.println(Messages._ER_GT_TB_METADT);
 		}
 		return Collections.unmodifiableList(columns);
 	}
@@ -223,12 +225,13 @@ public class TableUtilities {
 		if (tableExists(pPath, pDbName, tableName)) {
 			for (Column c : getColumnsTable(pPath, pDbName, tableName)) {
 				if (columnName.equals(c.getName())) {
+					con.close();
 					return c;
 				}
 			}
-			System.out.println("Column " + columnName + " does not exist.");
+			System.out.println(Messages._CLM_NO_EX + columnName);
 		} else {
-			System.out.println("Table " + tableName + " does not exist.");
+			System.out.println(Messages._TB_NO_EX + tableName);
 		}
 		con.close();
 		return null;

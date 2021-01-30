@@ -5,6 +5,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+/**
+ * 
+ * A helper class for more organisation. It contains methods for the
+ * implementation of the data logic. It is also used for the JUnittests.
+ *
+ */
 public class DataUtilities {
 
 	/**
@@ -17,19 +23,19 @@ public class DataUtilities {
 	 */
 	public int getTableNumberRows(final String pPath, final String pDbName, final String pTableName) {
 		final Connection con = DatabaseFactory.getInstance().getDatabase(pPath, pDbName);
-		int rowcounts = 0;
+		int rowCounter = 0;
 		try {
 			final Statement stm = con.createStatement();
 			final ResultSet rs = stm.executeQuery("SELECT * FROM " + pTableName);
-			rowcounts = 0;
+			rowCounter = 0;
 			while (rs.next()) {
-				rowcounts++;
+				rowCounter++;
 			}
 			con.close();
 		} catch (SQLException e) {
 			System.err.println(e.getMessage());
 		}
-		return rowcounts;
+		return rowCounter;
 	}
 
 	/**

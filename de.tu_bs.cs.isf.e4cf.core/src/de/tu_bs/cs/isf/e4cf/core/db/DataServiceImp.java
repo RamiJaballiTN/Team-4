@@ -1,4 +1,4 @@
-package de.tu_bs.cs.isf.e4cf.core.db;
+ package de.tu_bs.cs.isf.e4cf.core.db;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -6,10 +6,15 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import de.tu_bs.cs.isf.e4cf.core.db.model.Sorting;
+import de.tu_bs.cs.isf.e4cf.core.db.model.Sorter;
 import de.tu_bs.cs.isf.e4cf.core.db.model.ColumnValue;
 import de.tu_bs.cs.isf.e4cf.core.db.model.Condition;
 
+/**
+ * DAO class for the implementation of the data logic.
+ * Every SQL stetement concerning data is here to find. 
+ *
+ */
 public class DataServiceImp extends DataUtilities implements IDataService {
 
 	/**
@@ -40,7 +45,7 @@ public class DataServiceImp extends DataUtilities implements IDataService {
 					"insert into " + pTableName + " (" + columnsAsSql + ") values (" + dataAsSql + ");");
 			prep.execute();
 		} catch (SQLException e) {
-			System.err.println("Error while insering data: " + e.getMessage());
+			System.err.println(Messages._ER_INS_DATA + e.getMessage());
 		}
 		con.close();
 	}
@@ -66,11 +71,11 @@ public class DataServiceImp extends DataUtilities implements IDataService {
 			}
 			sqlStatement = sqlStatement.substring(0, sqlStatement.length() - 2);
 			sqlStatement += condition.getConditionAsSql();
-			System.out.println("Test:" + sqlStatement);
+			//System.out.println("Test:" + sqlStatement);
 			s.execute(sqlStatement);
 			con.close();
 		} catch (SQLException e) {
-			System.err.println("Error while updating data: " + e.getMessage());
+			System.err.println(Messages._ER_UPD_DATA + e.getMessage());
 		}
 	}
 
@@ -91,7 +96,7 @@ public class DataServiceImp extends DataUtilities implements IDataService {
 			stm.execute(sql);
 			con.close();
 		} catch (SQLException e) {
-			System.err.println("Error while deleting data: " + e.getMessage());
+			System.err.println(Messages._ER_DEL_DATA + e.getMessage());
 		}
 	}
 
@@ -108,7 +113,7 @@ public class DataServiceImp extends DataUtilities implements IDataService {
 	 */
 	@Override
 	public ResultSet selectData(final String pPath, final String pDbName, final String pTableName, Condition condition,
-			Sorting sorting, final String... attributes) {
+			Sorter sorting, final String... attributes) {
 		final Connection con = DatabaseFactory.getInstance().getDatabase(pPath, pDbName);
 		// System.out.println("Test Select: " + sqlStatement);
 		ResultSet rs = null;
@@ -135,7 +140,7 @@ public class DataServiceImp extends DataUtilities implements IDataService {
 			printResultSet(stm, sqlStatement);
 			con.close();
 		} catch (SQLException e) {
-			System.err.println("Error while select statement: " + e.getMessage());
+			System.err.println(Messages._ER_SEL_DATA + e.getMessage());
 		}
 		return rs;
 	}
@@ -154,7 +159,7 @@ public class DataServiceImp extends DataUtilities implements IDataService {
 	 */
 	@Override
 	public long count(final String pPath, final String pDbName, final String pTableName, Condition condition,
-			Sorting sorting, final String attributes, final boolean distinct) {
+			Sorter sorting, final String attributes, final boolean distinct) {
 		final Connection con = DatabaseFactory.getInstance().getDatabase(pPath, pDbName);
 		long countResult = 0;
 		try {
@@ -174,12 +179,12 @@ public class DataServiceImp extends DataUtilities implements IDataService {
 				sqlStatement = "SELECT " + "COUNT(" + attributes + ") " + " AS " + attributes + "_num" + " FROM "
 						+ pTableName + " " + conditionsAsSql + sortingsAsSql;
 			}
-			System.out.println("Test count: " + sqlStatement);
+			//System.out.println("Test count: " + sqlStatement);
 			ResultSet rs = stm.executeQuery(sqlStatement);
 			countResult = rs.getLong(attributes + "_num");
 			con.close();
 		} catch (SQLException e) {
-			System.err.println("Error while count statement: " + e.getMessage());
+			System.err.println(Messages._ER_CNT + e.getMessage());
 		}
 		return countResult;
 	}
@@ -197,7 +202,7 @@ public class DataServiceImp extends DataUtilities implements IDataService {
 	 * @return long
 	 */
 	public long sum(final String pPath, final String pDbName, final String pTableName, Condition condition,
-			Sorting sorting, final String attributes, final boolean distinct) {
+			Sorter sorting, final String attributes, final boolean distinct) {
 		final Connection con = DatabaseFactory.getInstance().getDatabase(pPath, pDbName);
 		long resultSum = 0;
 		try {
@@ -221,7 +226,7 @@ public class DataServiceImp extends DataUtilities implements IDataService {
 			resultSum = rs.getLong(attributes + "_num");
 			con.close();
 		} catch (SQLException e) {
-			System.err.println("Error while sum statement: " + e.getMessage());
+			System.err.println(Messages._ER_SUM + e.getMessage());
 		}
 		return resultSum;
 	}
