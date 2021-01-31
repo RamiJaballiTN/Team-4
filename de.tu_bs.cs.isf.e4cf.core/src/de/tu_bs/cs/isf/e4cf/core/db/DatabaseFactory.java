@@ -118,7 +118,7 @@ public class DatabaseFactory {
 		if (databaseExists(pPath, pOldDbName)) {
 			if (!pOldDbName.equals(pNewDbName)) {
 				new File(pPath + pOldDbName).renameTo(new File(pPath + pNewDbName));
-				System.out.println("Renaming database " + pOldDbName + " to " + pNewDbName);
+				System.out.println(Messages._DB_RN_SUCC + pOldDbName + Messages._TO + pNewDbName);
 			}
 		} else {
 			System.out.println(Messages._DB_NOT_EX + pOldDbName);

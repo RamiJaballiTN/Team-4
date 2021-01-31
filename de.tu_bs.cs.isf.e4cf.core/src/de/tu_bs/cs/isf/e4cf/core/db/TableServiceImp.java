@@ -158,10 +158,10 @@ public class TableServiceImp extends TableUtilities implements ITableService {
 						final String sqlStatement = "ALTER TABLE " + pTableName + " " + "RENAME TO " + pNewTableName
 								+ ";";
 						s.execute(sqlStatement);
-						System.out.println("Renaming tablename " + pTableName + " to " + pNewTableName);
+						System.out.println(Messages._TB_RN_SUCC + pTableName + Messages._TO + pNewTableName);
 					}
 				} else {
-					System.out.println("Can not Rename table with an existing name: " + pNewTableName);
+					System.out.println(Messages._TB_NO_RN + pNewTableName);
 				}
 			} else {
 				System.out.println(Messages._TB_NO_EX + pTableName);
@@ -432,6 +432,7 @@ public class TableServiceImp extends TableUtilities implements ITableService {
 				break;
 			case "ai":
 				getColumn(columns, c).setAutoIncrement(state);
+				getColumn(columns, c).setPrimaryKey(false);
 				break;
 			default:
 				System.err.println(Messages._FALSE_TYPE_CONSTRAINT);

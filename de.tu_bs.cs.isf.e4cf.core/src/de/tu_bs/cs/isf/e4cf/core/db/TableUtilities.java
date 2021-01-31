@@ -167,6 +167,7 @@ public class TableUtilities {
 	 * @param tableName String name of the table
 	 * @return List<Column> list of the column in the database
 	 */
+	@SuppressWarnings("unlikely-arg-type")
 	public List<Column> getColumnsTable(final String pPath, final String pDbName, final String pTableName) {
 		final Connection con = DatabaseFactory.getInstance().getDatabase(pPath, pDbName);
 		List<Column> columns = new ArrayList<>();
@@ -182,7 +183,12 @@ public class TableUtilities {
 				Column c = new Column(mrs.getColumnLabel(i), mrs.getColumnTypeName(i));
 				c.setPrimaryKey(primaryKeySet.contains(mrs.getColumnLabel(i)));
 				c.setUnique(uniqueKeySet.contains(mrs.getColumnLabel(i)));
-				c.setAutoIncrement(mrs.isAutoIncrement(i));
+				if(mrs.isAutoIncrement(i)) {
+					c.setPrimaryKey(primaryKeySet.contains(false));
+					c.setAutoIncrement(true);
+				}else {
+					c.setAutoIncrement(false);
+				}
 				columns.add(c);
 			}
 

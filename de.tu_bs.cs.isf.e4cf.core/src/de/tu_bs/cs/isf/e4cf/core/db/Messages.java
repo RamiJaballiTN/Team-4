@@ -17,6 +17,7 @@ public final class Messages {
 	public static final String _DB_RM = "Database deleted: ";
 	public static final String _ER_DB_MV = "Error while moving database: ";
 	public static final String _DB_MV_SUCC = " was moved successfully from ";
+	public static final String _DB_RN_SUCC = "Renaming database ";
 
 	// Messages concerning data
 	public static final String _ER_INS_DATA = "Error while insering data: ";
@@ -44,11 +45,12 @@ public final class Messages {
 	public static final String _FALSE_TYPE_CONSTRAINT = "False type constraint given.";
 	public static final String _ER_GT_TB_METADT = "Error while getting table metadata.";
 	public static final String _ER_AD_CLM = "Error while adding column: ";
-	
-	//General
+	public static final String _TB_RN_SUCC = "Renaming tablename ";
+	public static final String _TB_NO_RN ="Can not Rename table with an existing name: ";
+
+	// General
 	public static final String _TO = "to";
-	
-	
+
 	private static Messages _INSTANCE = new Messages();
 
 	public synchronized static Messages getInstance() {
