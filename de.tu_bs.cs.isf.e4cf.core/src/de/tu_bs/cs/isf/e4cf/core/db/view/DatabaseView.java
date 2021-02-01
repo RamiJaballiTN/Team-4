@@ -3,6 +3,7 @@ package de.tu_bs.cs.isf.e4cf.core.db.view;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 import java.util.ArrayList;
@@ -35,15 +36,12 @@ public final class DatabaseView extends Application {
 	@Override
 	public void start(final Stage stage) {
 		stage.setTitle("DB View");
-		stage.setWidth(500);
-		stage.setHeight(300);
+		stage.setWidth(450);
+		stage.setHeight(200);
 
 		final Button openButton = new Button("Open Database");
-		final Button openTable = new Button("Open Table");
-		final Label labelDb = new Label("Datenbank auswählen: ");
-		final Label labelTable = new Label("Tabelle auswählen: ");
+		final Label labelDb = new Label("Choose a database: ");
 		ChoiceBox<String> cbDb = new ChoiceBox<String>();
-		ChoiceBox<String> cbTable = new ChoiceBox<String>();
 
 		final File file = new File("./testDatabases/");
 		final ObservableList<String> dataFiles = FXCollections.observableArrayList(getFiles(file));
@@ -55,17 +53,7 @@ public final class DatabaseView extends Application {
 			public void handle(final ActionEvent e) {
 				String selectedDb = cbDb.getSelectionModel().getSelectedItem().toString();
 				File dbFile = new File(selectedDb);
-				List<String> tNames = selectTable(dbFile);
-
-				final ObservableList<String> tableNames = FXCollections.observableArrayList(tNames);
-				cbTable.setItems(tableNames);
-				openTable.setOnAction(new EventHandler<ActionEvent>() {
-					@Override
-					public void handle(final ActionEvent e) {
-						String selectedTable = cbTable.getSelectionModel().getSelectedItem().toString();
-						showTable(dbFile, selectedTable);
-					}
-				});
+				selectTable(dbFile, stage);
 			}
 		});
 
@@ -74,12 +62,9 @@ public final class DatabaseView extends Application {
 		GridPane.setConstraints(labelDb, 0, 0);
 		GridPane.setConstraints(openButton, 1, 1);
 		GridPane.setConstraints(cbDb, 1, 0);
-		GridPane.setConstraints(labelTable, 0, 2);
-		GridPane.setConstraints(openTable, 1, 4);
-		GridPane.setConstraints(cbTable, 1, 2);
-		inputGridPane.setHgap(6);
-		inputGridPane.setVgap(6);
-		inputGridPane.getChildren().addAll(labelDb, cbDb, openButton, labelTable, cbTable, openTable);
+		inputGridPane.setHgap(10);
+		inputGridPane.setVgap(20);
+		inputGridPane.getChildren().addAll(labelDb, cbDb, openButton);
 
 		final Pane rootGroup = new VBox(12);
 		rootGroup.getChildren().addAll(inputGridPane);
@@ -106,16 +91,54 @@ public final class DatabaseView extends Application {
 		return files;
 	}
 
-	private List<String> selectTable(File file) {
+	private void selectTable(File file, Stage stage) {
 		List<String> tables = new ArrayList<String>();
+		final Button openTable = new Button("Open Table");
+		final Label labelTable = new Label("Choose a table: ");
+		ChoiceBox<String> cbTable = new ChoiceBox<String>();
+		final Button backButton = new Button("Go Back");
+
 		try {
 			TableServiceImp tI = new TableServiceImp();
 			tables = tI.getTables("./testDatabases/", file.getName());
 
+			final ObservableList<String> tableNames = FXCollections.observableArrayList(tables);
+			cbTable.setItems(tableNames);
+			openTable.setOnAction(new EventHandler<ActionEvent>() {
+				@Override
+				public void handle(final ActionEvent e) {
+					String selectedTable = cbTable.getSelectionModel().getSelectedItem().toString();
+					showTable(file, selectedTable);
+				}
+			});
+
+			backButton.setOnAction(new EventHandler<ActionEvent>() {
+				@Override
+				public void handle(final ActionEvent e) {
+					start(stage);
+				}
+			});
+
+			final GridPane inputGridPane = new GridPane();
+			GridPane.setConstraints(labelTable, 0, 0);
+			GridPane.setConstraints(openTable, 1, 1);
+			GridPane.setConstraints(cbTable, 1, 0);
+			GridPane.setConstraints(backButton, 2, 1);
+
+			inputGridPane.setHgap(10);
+			inputGridPane.setVgap(20);
+			inputGridPane.getChildren().addAll(labelTable, cbTable, openTable, backButton);
+
+			final Pane rootGroup = new VBox(12);
+			rootGroup.getChildren().addAll(inputGridPane);
+			rootGroup.setPadding(new Insets(12, 12, 12, 12));
+
+			stage.setScene(new Scene(rootGroup));
+			stage.show();
+
 		} catch (Exception e) {
 			System.err.println(e);
 		}
-		return tables;
 	}
 
 	private void showTable(File file, String tableName) {
@@ -151,10 +174,7 @@ public final class DatabaseView extends Application {
 
 			final ObservableList<List<StringProperty>> data = FXCollections.observableArrayList();
 			List<StringProperty> myData = new ArrayList<>();
-
-			final Connection con = DatabaseFactory.getInstance().getDatabase("./testDatabases/", file.getName());
-			final Statement stm = con.createStatement();
-			ResultSet result = stm.executeQuery("SELECT * FROM " + tableName);
+			ResultSet result = printTableView("./testDatabases/", file.getName(), tableName);
 
 			while (result.next()) {
 				for (int i = 1; i <= cols.size(); i++) {
@@ -182,5 +202,13 @@ public final class DatabaseView extends Application {
 		} catch (Exception e) {
 			System.err.println(e);
 		}
+	}
+
+	public ResultSet printTableView(final String pPath, final String pDbName, final String pTableName)
+			throws SQLException {
+		final Connection con = DatabaseFactory.getInstance().getDatabase(pPath, pDbName);
+		final Statement stm = con.createStatement();
+		ResultSet result = stm.executeQuery("SELECT * FROM " + pTableName);
+		return result;
 	}
 }
