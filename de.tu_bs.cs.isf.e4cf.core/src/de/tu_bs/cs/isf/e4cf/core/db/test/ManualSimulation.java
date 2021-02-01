@@ -23,14 +23,18 @@ public class ManualSimulation {
 
 		final String _DATABASEPATH = "./testDatabases/";
 		final String _DATABASENAME = "TEstDB";
+		final String _NEWDATABASEPATH = "";
 		final String _TABLEENAME = "testTabelle";
 
 		/* Database */
 
-		 //DatabaseFactory.getInstance().createDatabase(_DATABASEPATH, _DATABASENAME);
-		 //DatabaseFactory.getInstance().renameDatabase(_DATABASEPATH, _DATABASENAME, "newName" + _DATABASENAME);
-		 //DatabaseFactory.getInstance().moveDatabase(_DATABASENAME, _DATABASEPATH, "");
-		 //DatabaseFactory.getInstance().deleteDatabase(_DATABASEPATH, _DATABASENAME);
+		 DatabaseFactory.getInstance().createDatabase(_DATABASEPATH, _DATABASENAME);
+		 
+		 DatabaseFactory.getInstance().renameDatabase(_DATABASEPATH, _DATABASENAME, "newName" + _DATABASENAME);
+		 
+		 DatabaseFactory.getInstance().moveDatabase(_DATABASENAME, _DATABASEPATH, _NEWDATABASEPATH);
+		 
+		 DatabaseFactory.getInstance().deleteDatabase(_DATABASEPATH, _DATABASENAME);
 
 		// _____________________________________________________________________________________
 
@@ -38,33 +42,29 @@ public class ManualSimulation {
 
 		TableServiceImp ts = new TableServiceImp();
 
-		Column c1 = new Column("id", "integer", false, false, false, false);
-		Column c2 = new Column("name", "varchar (60)", false, true, false, true);
-		Column c3 = new Column("age", "integer");
+		Column column_1 = new Column("id", "integer", false, false, false, false);
+		Column column_2 = new Column("name", "varchar (60)", false, true, false, true);
+		Column column_3 = new Column("age", "integer");
 
-		//ts.createTable(_DATABASEPATH, _DATABASENAME, _TABLEENAME, c1, c2); 
+		ts.createTable(_DATABASEPATH, _DATABASENAME, _TABLEENAME, column_1, column_2); 
 		 
-		//System.out.println("Columns: "+ts.getColumnsTable(_DATABASEPATH, _DATABASENAME, _TABLEENAME));
+		System.out.println("Columns: "+ts.getColumnsTable(_DATABASEPATH, _DATABASENAME, _TABLEENAME));
 
-		//ts.deleteTable(_DATABASEPATH, _DATABASENAME, _TABLEENAME);
+		ts.deleteTable(_DATABASEPATH, _DATABASENAME, _TABLEENAME);
 		 
-		//ts.renameTable(_DATABASEPATH, _DATABASENAME, _TABLEENAME, "newName" + _TABLEENAME);
+		ts.renameTable(_DATABASEPATH, _DATABASENAME, _TABLEENAME, "newName" + _TABLEENAME);
 
-		//ts.renameColumn(_DATABASEPATH, _DATABASENAME, _TABLEENAME, "id", "id_table");
+		ts.deleteColumn(_DATABASEPATH, _DATABASENAME, _TABLEENAME, "id");
 
-		//ts.deleteColumn(_DATABASEPATH, _DATABASENAME, _TABLEENAME, "id");
-
-		//ts.addColumn(_DATABASEPATH, _DATABASENAME, _TABLEENAME, c3);
+		ts.addColumn(_DATABASEPATH, _DATABASENAME, _TABLEENAME, column_3);
 		 
-		//System.out.println("Columns: "+ts.getColumnsTable(_DATABASEPATH, _DATABASENAME, _TABLEENAME));
+		ts.switchColumnPrimaryKey(_DATABASEPATH, _DATABASENAME, _TABLEENAME, true, column_1.getName());
 		 
-		//ts.switchColumnPrimaryKey(_DATABASEPATH, _DATABASENAME, _TABLEENAME, true, c1.getName());
+		ts.switchColumnUnique(_DATABASEPATH, _DATABASENAME, _TABLEENAME, false, column_2.getName());
 		 
-		//ts.switchColumnUnique(_DATABASEPATH, _DATABASENAME, _TABLEENAME, false, c2.getName());
+		ts.switchColumnAutoIncrement(_DATABASEPATH, _DATABASENAME, _TABLEENAME, true, column_1.getName());
 		 
-		//ts.switchColumnAutoIncrement(_DATABASEPATH, _DATABASENAME, _TABLEENAME, true, c1.getName());
-		 
-		//ts.switchColumnNotNull(_DATABASEPATH, _DATABASENAME, _TABLEENAME, true, c3.getName());
+		ts.switchColumnNotNull(_DATABASEPATH, _DATABASENAME, _TABLEENAME, true, column_3.getName());
 		
 
 		// _____________________________________________________________________________________
@@ -73,25 +73,26 @@ public class ManualSimulation {
 
 		DataServiceImp ds = new DataServiceImp();
 
-		ColumnValue cv1 = new ColumnValue(c2.getName(), new String("Isy P"));
-		ColumnValue cv2 = new ColumnValue(c3.getName(), 44);
+		ColumnValue value_1 = new ColumnValue("id", new String("Isy P"));
+		ColumnValue value_2 = new ColumnValue("age", 44);
 
-		ColumnValue cv3 = new ColumnValue(c2.getName(), "Rami J");
-		ColumnValue cv4 = new ColumnValue(c3.getName(), 24);
+		ColumnValue value_3 = new ColumnValue(column_2 .getName(), "Rami .");
+		ColumnValue value_4 = new ColumnValue(column_3.getName(), 24);
 
-		//ds.insertData(_DATABASEPATH, _DATABASENAME, _TABLEENAME, cv1, cv2);
-		//ds.insertData(_DATABASEPATH, _DATABASENAME, _TABLEENAME, cv3, cv4);
+		ds.insertData(_DATABASEPATH, _DATABASENAME, _TABLEENAME, value_1, value_2);
+		
+		ds.insertData(_DATABASEPATH, _DATABASENAME, _TABLEENAME, value_3, value_4);
 
-		//ds.printTable(_DATABASEPATH, _DATABASENAME, _TABLEENAME);
+		ds.printTable(_DATABASEPATH, _DATABASENAME, _TABLEENAME);
 
-		Condition whereCondition = new AndCondition(cv4);
+		Condition whereCondition = new AndCondition(value_3, value_1);
 
-		ColumnValue newName = new ColumnValue(c2.getName(), "Rami Jaballi");
-		ColumnValue age = new ColumnValue(c3.getName(), 25);
+		ColumnValue newName = new ColumnValue("name", "Rami Jaballi");
+		ColumnValue age = new ColumnValue("age", 25);
 
-		//ds.updateData(_DATABASEPATH, _DATABASENAME, _TABLEENAME, whereCondition, newName);
+		ds.updateData(_DATABASEPATH, _DATABASENAME, _TABLEENAME, whereCondition, newName);
 
-		//ds.printTable(_DATABASEPATH, _DATABASENAME, _TABLEENAME);
+		ds.printTable(_DATABASEPATH, _DATABASENAME, _TABLEENAME);
 		
 		Condition orderCondition = new AndCondition(age);
 
@@ -99,9 +100,9 @@ public class ManualSimulation {
 		
 		Sorter sorter = new Sorter(noCondition, orderCondition, "ASC");
 		
-		//ds.selectData(_DATABASEPATH, _DATABASENAME, _TABLEENAME, noCondition, sorter, "name","age");
+		ds.selectData(_DATABASEPATH, _DATABASENAME, _TABLEENAME, noCondition, sorter, "name","age");
 
-		//ds.deleteData(_DATABASEPATH, _DATABASENAME, _TABLEENAME, whereCondition);
+		ds.deleteData(_DATABASEPATH, _DATABASENAME, _TABLEENAME, whereCondition);
 
 	}
 
