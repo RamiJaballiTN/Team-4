@@ -74,7 +74,10 @@ public final class Messages {
 	public static final String COLUMN = " COLUMN ";
 	public static final String ADD = " ADD ";
 	public static final String _TO = " to ";
-	
+	public static final String AS = " AS ";
+	public static final String SUM = " SUM ";
+	public static final String COUNT = " COUNT ";
+	public static final String DISTINCT = " DISTINCT ";
 
 	private static Messages _INSTANCE = new Messages();
 

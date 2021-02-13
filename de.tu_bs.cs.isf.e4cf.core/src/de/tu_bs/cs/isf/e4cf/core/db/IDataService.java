@@ -87,7 +87,8 @@ public interface IDataService {
 	 * @param attributes the columns to select
 	 * @param distinct   boolean for distinct counting
 	 * @return long
+	 * @throws SQLException 
 	 */
 	public long sum(final String pPath, final String pDbName, final String pTableName, Condition condition,
-			Sorter sorting, final String attributes, final boolean distinct);
+			Sorter sorting, final String attributes, final boolean distinct) throws SQLException;
 }

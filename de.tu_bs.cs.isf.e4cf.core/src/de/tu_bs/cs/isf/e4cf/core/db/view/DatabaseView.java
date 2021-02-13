@@ -31,6 +31,11 @@ import javafx.stage.Stage;
 import de.tu_bs.cs.isf.e4cf.core.db.*;
 import de.tu_bs.cs.isf.e4cf.core.db.model.Column;
 
+/**
+ * 
+ * Class responsible for viewing the databases as GUI.
+ *
+ */
 public final class DatabaseView extends Application {
 
 	public static final String _DATABSEPATH = "./testDatabases/";

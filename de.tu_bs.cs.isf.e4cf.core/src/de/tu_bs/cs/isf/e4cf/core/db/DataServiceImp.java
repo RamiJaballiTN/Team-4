@@ -62,19 +62,15 @@ public class DataServiceImp extends DataUtilities implements IDataService {
 	@Override
 	public void updateData(final String pPath, final String pDbName, final String pTableName, Condition condition,
 			ColumnValue... data) {
-		final Connection con = DatabaseFactory.getInstance().getDatabase(pPath, pDbName);
 		try {
-			final Statement s = con.createStatement();
 			String sqlStatement = Messages.UPDATE + pTableName + Messages.SET;
 			for (final ColumnValue c : data) {
 				sqlStatement += c.getColumnName() + " = " + "'" + c.getValue() + "', ";
 			}
 			sqlStatement = sqlStatement.substring(0, sqlStatement.length() - 2);
 			sqlStatement += condition.getConditionAsSql();
-			// System.out.println("Test:" + sqlStatement);
-			s.execute(sqlStatement);
-			con.close();
-		} catch (SQLException e) {
+			executeStatement(pPath, pDbName, sqlStatement);
+		} catch (Exception e) {
 			System.err.println(Messages._ER_UPD_DATA + e.getMessage());
 		}
 	}
@@ -89,12 +85,9 @@ public class DataServiceImp extends DataUtilities implements IDataService {
 	 */
 	@Override
 	public void deleteData(final String pPath, final String pDbName, final String pTableName, Condition condition) {
-		final Connection con = DatabaseFactory.getInstance().getDatabase(pPath, pDbName);
 		try {
-			final Statement stm = con.createStatement();
-			final String sql = Messages.DELETE + Messages.FROM + pTableName + condition.getConditionAsSql();
-			stm.execute(sql);
-			con.close();
+			final String sqlStatement = Messages.DELETE + Messages.FROM + pTableName + condition.getConditionAsSql();
+			executeStatement(pPath, pDbName, sqlStatement);
 		} catch (SQLException e) {
 			System.err.println(Messages._ER_DEL_DATA + e.getMessage());
 		}
@@ -160,9 +153,9 @@ public class DataServiceImp extends DataUtilities implements IDataService {
 	@Override
 	public long count(final String pPath, final String pDbName, final String pTableName, Condition condition,
 			Sorter sorting, final String attributes, final boolean distinct) {
-		final Connection con = DatabaseFactory.getInstance().getDatabase(pPath, pDbName);
 		long countResult = 0;
 		try {
+			final Connection con = DatabaseFactory.getInstance().getDatabase(pPath, pDbName);
 			final Statement stm = con.createStatement();
 			String sqlStatement = "";
 			String conditionsAsSql = "", sortingsAsSql = "";
@@ -172,14 +165,13 @@ public class DataServiceImp extends DataUtilities implements IDataService {
 			if (null != sorting) {
 				sortingsAsSql = sorting.getSortingAsSql();
 			}
+			sqlStatement = Messages.SELECT + Messages.COUNT + " ( ";
 			if (distinct) {
-				sqlStatement = "SELECT " + "COUNT(DISTINCT " + attributes + ") " + " AS " + attributes + "_num"
-						+ " FROM " + pTableName + " " + conditionsAsSql + sortingsAsSql;
-			} else {
-				sqlStatement = "SELECT " + "COUNT(" + attributes + ") " + " AS " + attributes + "_num" + " FROM "
-						+ pTableName + " " + conditionsAsSql + sortingsAsSql;
+				sqlStatement += Messages.DISTINCT;
 			}
-			// System.out.println("Test count: " + sqlStatement);
+			sqlStatement += attributes + ") " + Messages.AS + attributes + "_num" + Messages.FROM + pTableName + " "
+					+ conditionsAsSql + sortingsAsSql;
+
 			ResultSet rs = stm.executeQuery(sqlStatement);
 			countResult = rs.getLong(attributes + "_num");
 			con.close();
@@ -203,9 +195,9 @@ public class DataServiceImp extends DataUtilities implements IDataService {
 	 */
 	public long sum(final String pPath, final String pDbName, final String pTableName, Condition condition,
 			Sorter sorting, final String attributes, final boolean distinct) {
-		final Connection con = DatabaseFactory.getInstance().getDatabase(pPath, pDbName);
-		long resultSum = 0;
+		long resultSum = -1;
 		try {
+			final Connection con = DatabaseFactory.getInstance().getDatabase(pPath, pDbName);
 			final Statement stm = con.createStatement();
 			String sqlStatement = "";
 			String conditionsAsSql = "", sortingsAsSql = "";
@@ -215,13 +207,13 @@ public class DataServiceImp extends DataUtilities implements IDataService {
 			if (null != sorting) {
 				sortingsAsSql = sorting.getSortingAsSql();
 			}
+			sqlStatement = Messages.SELECT + Messages.SUM + " ( ";
 			if (distinct) {
-				sqlStatement = "SELECT " + "SUM(DISTINCT " + attributes + ") " + " AS " + attributes + "_num" + " FROM "
-						+ pTableName + " " + conditionsAsSql + sortingsAsSql;
-			} else {
-				sqlStatement = "SELECT " + "SUM(" + attributes + ") " + " AS " + attributes + "_num" + " FROM "
-						+ pTableName + " " + conditionsAsSql + sortingsAsSql;
+				sqlStatement += Messages.DISTINCT;
 			}
+			sqlStatement += attributes + ") " + Messages.AS + attributes + "_num" + Messages.FROM + pTableName + " "
+					+ conditionsAsSql + sortingsAsSql;
+
 			ResultSet rs = stm.executeQuery(sqlStatement);
 			resultSum = rs.getLong(attributes + "_num");
 			con.close();
@@ -231,5 +223,19 @@ public class DataServiceImp extends DataUtilities implements IDataService {
 		return resultSum;
 	}
 
-	
+	/**
+	 * Methode to execute sql statements.
+	 * 
+	 * @param pPath
+	 * @param pDbName
+	 * @param sqlStatement
+	 * @throws SQLException
+	 */
+	protected void executeStatement(final String pPath, final String pDbName, final String sqlStatement)
+			throws SQLException {
+		final Connection con = DatabaseFactory.getInstance().getDatabase(pPath, pDbName);
+		Statement s = con.createStatement();
+		s.execute(sqlStatement);
+		con.close();
+	}
 }
