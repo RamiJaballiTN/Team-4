@@ -1,4 +1,4 @@
- package de.tu_bs.cs.isf.e4cf.core.db;
+package de.tu_bs.cs.isf.e4cf.core.db;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -11,8 +11,8 @@ import de.tu_bs.cs.isf.e4cf.core.db.model.ColumnValue;
 import de.tu_bs.cs.isf.e4cf.core.db.model.Condition;
 
 /**
- * DAO class for the implementation of the data logic.
- * Every SQL stetement concerning data is here to find. 
+ * DAO class for the implementation of the data logic. Every SQL stetement
+ * concerning data is here to find.
  *
  */
 public class DataServiceImp extends DataUtilities implements IDataService {
@@ -41,8 +41,8 @@ public class DataServiceImp extends DataUtilities implements IDataService {
 			// delete the last commas
 			columnsAsSql = columnsAsSql.substring(0, columnsAsSql.length() - 1);
 			dataAsSql = dataAsSql.substring(0, dataAsSql.length() - 1);
-			PreparedStatement prep = con.prepareStatement(
-					"insert into " + pTableName + " (" + columnsAsSql + ") values (" + dataAsSql + ");");
+			PreparedStatement prep = con.prepareStatement(Messages.INSERT + Messages.INTO + pTableName + " ("
+					+ columnsAsSql + ") " + Messages.VALUES + " (" + dataAsSql + ");");
 			prep.execute();
 		} catch (SQLException e) {
 			System.err.println(Messages._ER_INS_DATA + e.getMessage());
@@ -65,13 +65,13 @@ public class DataServiceImp extends DataUtilities implements IDataService {
 		final Connection con = DatabaseFactory.getInstance().getDatabase(pPath, pDbName);
 		try {
 			final Statement s = con.createStatement();
-			String sqlStatement = "UPDATE " + pTableName + " SET ";
+			String sqlStatement = Messages.UPDATE + pTableName + Messages.SET;
 			for (final ColumnValue c : data) {
 				sqlStatement += c.getColumnName() + " = " + "'" + c.getValue() + "', ";
 			}
 			sqlStatement = sqlStatement.substring(0, sqlStatement.length() - 2);
 			sqlStatement += condition.getConditionAsSql();
-			//System.out.println("Test:" + sqlStatement);
+			// System.out.println("Test:" + sqlStatement);
 			s.execute(sqlStatement);
 			con.close();
 		} catch (SQLException e) {
@@ -92,7 +92,7 @@ public class DataServiceImp extends DataUtilities implements IDataService {
 		final Connection con = DatabaseFactory.getInstance().getDatabase(pPath, pDbName);
 		try {
 			final Statement stm = con.createStatement();
-			final String sql = "DELETE FROM " + pTableName + condition.getConditionAsSql();
+			final String sql = Messages.DELETE + Messages.FROM + pTableName + condition.getConditionAsSql();
 			stm.execute(sql);
 			con.close();
 		} catch (SQLException e) {
@@ -134,8 +134,8 @@ public class DataServiceImp extends DataUtilities implements IDataService {
 			if (null != sorting) {
 				sortingsAsSql = sorting.getSortingAsSql();
 			}
-			final String sqlStatement = "SELECT " + attributsAsSql + " FROM " + pTableName + " " + conditionsAsSql
-					+ sortingsAsSql;
+			final String sqlStatement = Messages.SELECT + attributsAsSql + Messages.FROM + pTableName + " "
+					+ conditionsAsSql + sortingsAsSql;
 			rs = stm.executeQuery(sqlStatement);
 			printResultSet(stm, sqlStatement);
 			con.close();
@@ -179,7 +179,7 @@ public class DataServiceImp extends DataUtilities implements IDataService {
 				sqlStatement = "SELECT " + "COUNT(" + attributes + ") " + " AS " + attributes + "_num" + " FROM "
 						+ pTableName + " " + conditionsAsSql + sortingsAsSql;
 			}
-			//System.out.println("Test count: " + sqlStatement);
+			// System.out.println("Test count: " + sqlStatement);
 			ResultSet rs = stm.executeQuery(sqlStatement);
 			countResult = rs.getLong(attributes + "_num");
 			con.close();
@@ -231,4 +231,5 @@ public class DataServiceImp extends DataUtilities implements IDataService {
 		return resultSum;
 	}
 
+	
 }

@@ -26,7 +26,7 @@ public class DataUtilities {
 		int rowCounter = 0;
 		try {
 			final Statement stm = con.createStatement();
-			final ResultSet rs = stm.executeQuery("SELECT * FROM " + pTableName);
+			final ResultSet rs = stm.executeQuery(Messages.SELECT + Messages.STAR + Messages.FROM + pTableName);
 			rowCounter = 0;
 			while (rs.next()) {
 				rowCounter++;
@@ -49,7 +49,7 @@ public class DataUtilities {
 	public void printTable(final String pPath, final String pDbName, final String pTableName) throws SQLException {
 		final Connection con = DatabaseFactory.getInstance().getDatabase(pPath, pDbName);
 		final Statement stm = con.createStatement();
-		final String sqlStatement = "SELECT * FROM " + pTableName;
+		final String sqlStatement = Messages.SELECT + Messages.STAR + Messages.FROM + pTableName;
 		printResultSet(stm, sqlStatement);
 		con.close();
 	}
@@ -80,7 +80,7 @@ public class DataUtilities {
 	protected void printResultSet(final Statement stm, final String sqlStatement) throws SQLException {
 		ResultSet rs = stm.executeQuery(sqlStatement);
 		System.out
-				.println("Number of rows in table '" + rs.getMetaData().getTableName(1) + "': " + getSizeResultSet(rs));
+				.println(Messages._TB_NR_ROW + " '" + rs.getMetaData().getTableName(1) + "': " + getSizeResultSet(rs));
 		final String separationLine = getSeparationLine(stm, sqlStatement);
 		System.out.println(getSeparationLine(stm, sqlStatement));
 		System.out.println(getTableHeader(stm, sqlStatement));
@@ -175,4 +175,6 @@ public class DataUtilities {
 			System.out.println(tabLine);
 		}
 	}
+	
+	
 }

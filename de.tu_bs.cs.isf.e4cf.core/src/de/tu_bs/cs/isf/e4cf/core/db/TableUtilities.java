@@ -31,7 +31,7 @@ public class TableUtilities {
 	 */
 	public boolean tableExists(final String pPath, final String pDbName, final String tableName) {
 		try {
-			for (final String str :  getTables(pPath, pDbName)) {
+			for (final String str : getTables(pPath, pDbName)) {
 				if (str.equals(tableName)) {
 					return true;
 				}
@@ -54,7 +54,7 @@ public class TableUtilities {
 	public boolean tableHasData(final String pPath, final String pDbName, final String pTableName) throws SQLException {
 		final Connection con = DatabaseFactory.getInstance().getDatabase(pPath, pDbName);
 		final Statement stm = con.createStatement();
-		ResultSet rs = stm.executeQuery("SELECT * FROM " + pTableName);
+		ResultSet rs = stm.executeQuery(Messages.SELECT + Messages.STAR + Messages.FROM + pTableName);
 		int rowcounts = 0;
 		while (rs.next()) {
 			rowcounts++;
@@ -172,7 +172,7 @@ public class TableUtilities {
 		final Connection con = DatabaseFactory.getInstance().getDatabase(pPath, pDbName);
 		List<Column> columns = new ArrayList<>();
 		try {
-			final String sql = "select * from " + pTableName + " LIMIT 0";
+			final String sql = Messages.SELECT + Messages.STAR + Messages.FROM + pTableName + " LIMIT 0";
 			final Statement statement = con.createStatement();
 			final ResultSet rs = statement.executeQuery(sql);
 			final ResultSetMetaData mrs = rs.getMetaData();
@@ -183,10 +183,10 @@ public class TableUtilities {
 				Column c = new Column(mrs.getColumnLabel(i), mrs.getColumnTypeName(i));
 				c.setPrimaryKey(primaryKeySet.contains(mrs.getColumnLabel(i)));
 				c.setUnique(uniqueKeySet.contains(mrs.getColumnLabel(i)));
-				if(mrs.isAutoIncrement(i)) {
+				if (mrs.isAutoIncrement(i)) {
 					c.setPrimaryKey(primaryKeySet.contains(false));
 					c.setAutoIncrement(true);
-				}else {
+				} else {
 					c.setAutoIncrement(false);
 				}
 				columns.add(c);

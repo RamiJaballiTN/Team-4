@@ -41,9 +41,6 @@ public class DatabaseFactory {
 	 * @return ConnectionFactory instance of class
 	 */
 	public synchronized static DatabaseFactory getInstance() {
-		if (null == INSTANCE) {
-			INSTANCE = new DatabaseFactory();
-		}
 		return INSTANCE;
 	}
 

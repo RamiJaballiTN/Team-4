@@ -33,25 +33,35 @@ import de.tu_bs.cs.isf.e4cf.core.db.model.Column;
 
 public final class DatabaseView extends Application {
 
+	public static final String _DATABSEPATH = "./testDatabases/";
+
+	public static void main(String[] args) {
+		Application.launch(args);
+	}
+
 	@Override
 	public void start(final Stage stage) {
+
+		// draw the window
 		stage.setTitle("DB View");
 		stage.setWidth(450);
 		stage.setHeight(200);
 
 		final Button openButton = new Button("Open Database");
 		final Label labelDb = new Label("Choose a database: ");
-		ChoiceBox<String> cbDb = new ChoiceBox<String>();
+		ChoiceBox<String> dbListChoiceBox = new ChoiceBox<String>();
 
-		final File file = new File("./testDatabases/");
+		// get the list of databases in path testDatabases
+		final File file = new File(_DATABSEPATH);
 		final ObservableList<String> dataFiles = FXCollections.observableArrayList(getFiles(file));
 
-		cbDb.setItems(dataFiles);
+		// fill the choicebox with the given db list
+		dbListChoiceBox.setItems(dataFiles);
 
 		openButton.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(final ActionEvent e) {
-				String selectedDb = cbDb.getSelectionModel().getSelectedItem().toString();
+				String selectedDb = dbListChoiceBox.getSelectionModel().getSelectedItem().toString();
 				File dbFile = new File(selectedDb);
 				selectTable(dbFile, stage);
 			}
@@ -61,10 +71,10 @@ public final class DatabaseView extends Application {
 
 		GridPane.setConstraints(labelDb, 0, 0);
 		GridPane.setConstraints(openButton, 1, 1);
-		GridPane.setConstraints(cbDb, 1, 0);
+		GridPane.setConstraints(dbListChoiceBox, 1, 0);
 		inputGridPane.setHgap(10);
 		inputGridPane.setVgap(20);
-		inputGridPane.getChildren().addAll(labelDb, cbDb, openButton);
+		inputGridPane.getChildren().addAll(labelDb, dbListChoiceBox, openButton);
 
 		final Pane rootGroup = new VBox(12);
 		rootGroup.getChildren().addAll(inputGridPane);
@@ -74,11 +84,7 @@ public final class DatabaseView extends Application {
 		stage.show();
 	}
 
-	public static void main(String[] args) {
-		Application.launch(args);
-	}
-
-	private List<String> getFiles(final File folder) {
+	protected List<String> getFiles(final File folder) {
 		List<String> files = new ArrayList<String>();
 
 		for (final File fileEntry : folder.listFiles()) {
@@ -91,23 +97,28 @@ public final class DatabaseView extends Application {
 		return files;
 	}
 
-	private void selectTable(File file, Stage stage) {
-		List<String> tables = new ArrayList<String>();
+	protected void selectTable(File file, Stage stage) {
+
+		List<String> tableList = new ArrayList<String>();
 		final Button openTable = new Button("Open Table");
 		final Label labelTable = new Label("Choose a table: ");
-		ChoiceBox<String> cbTable = new ChoiceBox<String>();
+		ChoiceBox<String> tableListChoiceBox = new ChoiceBox<String>();
 		final Button backButton = new Button("Go Back");
 
 		try {
 			TableServiceImp tI = new TableServiceImp();
-			tables = tI.getTables("./testDatabases/", file.getName());
 
-			final ObservableList<String> tableNames = FXCollections.observableArrayList(tables);
-			cbTable.setItems(tableNames);
+			// get the tables in the chosen database
+			tableList = tI.getTables(_DATABSEPATH, file.getName());
+
+			// fill choicebox with tables of the chosen databse
+			final ObservableList<String> tableNames = FXCollections.observableArrayList(tableList);
+			tableListChoiceBox.setItems(tableNames);
+
 			openTable.setOnAction(new EventHandler<ActionEvent>() {
 				@Override
 				public void handle(final ActionEvent e) {
-					String selectedTable = cbTable.getSelectionModel().getSelectedItem().toString();
+					String selectedTable = tableListChoiceBox.getSelectionModel().getSelectedItem().toString();
 					showTable(file, selectedTable);
 				}
 			});
@@ -122,12 +133,12 @@ public final class DatabaseView extends Application {
 			final GridPane inputGridPane = new GridPane();
 			GridPane.setConstraints(labelTable, 0, 0);
 			GridPane.setConstraints(openTable, 1, 1);
-			GridPane.setConstraints(cbTable, 1, 0);
+			GridPane.setConstraints(tableListChoiceBox, 1, 0);
 			GridPane.setConstraints(backButton, 2, 1);
 
 			inputGridPane.setHgap(10);
 			inputGridPane.setVgap(20);
-			inputGridPane.getChildren().addAll(labelTable, cbTable, openTable, backButton);
+			inputGridPane.getChildren().addAll(labelTable, tableListChoiceBox, openTable, backButton);
 
 			final Pane rootGroup = new VBox(12);
 			rootGroup.getChildren().addAll(inputGridPane);
@@ -141,7 +152,7 @@ public final class DatabaseView extends Application {
 		}
 	}
 
-	private void showTable(File file, String tableName) {
+	protected void showTable(File file, String tableName) {
 		try {
 			TableServiceImp tI = new TableServiceImp();
 
@@ -153,7 +164,8 @@ public final class DatabaseView extends Application {
 
 			final GridPane tableGridPane = new GridPane();
 
-			List<Column> cols = tI.getColumnsTable("./testDatabases/", file.getName(), tableName);
+			// get columns of the chosen table
+			List<Column> cols = tI.getColumnsTable(_DATABSEPATH, file.getName(), tableName);
 			final TableView<List<StringProperty>> table = new TableView<>();
 
 			final Label label = new Label(tableName);
@@ -174,7 +186,7 @@ public final class DatabaseView extends Application {
 
 			final ObservableList<List<StringProperty>> data = FXCollections.observableArrayList();
 			List<StringProperty> myData = new ArrayList<>();
-			ResultSet result = printTableView("./testDatabases/", file.getName(), tableName);
+			ResultSet result = getDataTable(_DATABSEPATH, file.getName(), tableName);
 
 			while (result.next()) {
 				for (int i = 1; i <= cols.size(); i++) {
@@ -204,11 +216,11 @@ public final class DatabaseView extends Application {
 		}
 	}
 
-	public ResultSet printTableView(final String pPath, final String pDbName, final String pTableName)
+	protected ResultSet getDataTable(final String pPath, final String pDbName, final String pTableName)
 			throws SQLException {
 		final Connection con = DatabaseFactory.getInstance().getDatabase(pPath, pDbName);
 		final Statement stm = con.createStatement();
-		ResultSet result = stm.executeQuery("SELECT * FROM " + pTableName);
+		ResultSet result = stm.executeQuery(Messages.SELECT + Messages.STAR + Messages.FROM + pTableName);
 		return result;
 	}
 }

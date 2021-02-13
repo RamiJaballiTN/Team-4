@@ -39,17 +39,42 @@ public final class Messages {
 	public static final String _ER_RN_TB = "Error while renaming table: ";
 	public static final String _ER_RN_CLM = "Error while renaming column: ";
 	public static final String _CLM_RM = "Column deleted: ";
+	public static final String _CLM_RN_FR_TO = "Column renamed from ";
+	public static final String _ERR_CLM_RN_EX_NM = "Can not rename with an existing columnname ";
 	public static final String _CLM_AL_EX = "Column already exists: ";
 	public static final String _CLM_NO_EX = "Column does not exist: ";
+	public static final String _CLM_ADD_SUCC = "Column added: ";
 	public static final String _NO_CHANGE_ALLOWED = "Table has already data. Such change could bring an SQLFailure.";
 	public static final String _FALSE_TYPE_CONSTRAINT = "False type constraint given.";
 	public static final String _ER_GT_TB_METADT = "Error while getting table metadata.";
 	public static final String _ER_AD_CLM = "Error while adding column: ";
 	public static final String _TB_RN_SUCC = "Renaming tablename ";
-	public static final String _TB_NO_RN ="Can not Rename table with an existing name: ";
+	public static final String _TB_NO_RN = "Can not Rename table with an existing name: ";
+	public static final String _TB_NR_ROW = "Number of rows in table";
 
-	// General
-	public static final String _TO = "to";
+	// SQL Statements
+	public static final String INSERT = " INSERT ";
+	public static final String INTO = " INTO ";
+	public static final String VALUES = " VALUES ";
+	public static final String UPDATE = " UPDATE ";
+	public static final String SET = " SET ";
+	public static final String SELECT = " SELECT ";
+	public static final String FROM = " FROM ";
+	public static final String STAR = " * ";
+	public static final String CREATE = " CREATE ";
+	public static final String TABLE = " TABLE ";
+	public static final String CONSTRAINT = " CONSTRAINT ";
+	public static final String UNIQUE = " UNIQUE ";
+	public static final String AUTOINCREMENT = " PRIMARY KEY AUTOINCREMENT ";
+	public static final String NOTNULL = " NOT NULL ";
+	public static final String DROP = " DROP ";
+	public static final String ALTER = " ALTER ";
+	public static final String RENAME = " RENAME ";
+	public static final String DELETE = " DELETE ";
+	public static final String COLUMN = " COLUMN ";
+	public static final String ADD = " ADD ";
+	public static final String _TO = " to ";
+	
 
 	private static Messages _INSTANCE = new Messages();
 

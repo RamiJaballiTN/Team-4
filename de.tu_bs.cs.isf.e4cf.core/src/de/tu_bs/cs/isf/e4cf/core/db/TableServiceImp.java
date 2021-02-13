@@ -36,18 +36,18 @@ public class TableServiceImp extends TableUtilities implements ITableService {
 			// at least one attribute to the table, else SQLFailure
 			if (attributes.length > 0) {
 				if (!tableExists(pPath, pDbName, pTableName)) {
-					String sqlStatement = "CREATE TABLE " + pTableName + "(";
-					String sqlPrimaryKey = "CONSTRAINT " + pTableName + "_pl PRIMARY KEY (";
+					String sqlStatement = Messages.CREATE + Messages.TABLE + pTableName + "(";
+					String sqlPrimaryKey = Messages.CONSTRAINT + pTableName + "_pl PRIMARY KEY (";
 					for (final Column c : attributes) {
 						sqlStatement += c.getName() + " " + c.getType();
 						if (c.isUnique()) {
-							sqlStatement += " UNIQUE";
+							sqlStatement += Messages.UNIQUE;
 						}
 						if (c.isAutoIncrement()) {
-							sqlStatement += " PRIMARY KEY AUTOINCREMENT";
+							sqlStatement += Messages.AUTOINCREMENT;
 						}
 						if (c.isNotNull()) {
-							sqlStatement += " NOT NULL";
+							sqlStatement += Messages.NOTNULL;
 						}
 						if (c.isPrimaryKey()) {
 							sqlPrimaryKey += c.getName() + ", ";
@@ -91,7 +91,7 @@ public class TableServiceImp extends TableUtilities implements ITableService {
 			final Statement s = con.createStatement();
 			final String tableName = cls.getSimpleName();
 			if (!tableExists(pPath, pDbName, cls.getSimpleName())) {
-				String sqlStatement = "CREATE TABLE " + tableName + " (";
+				String sqlStatement = Messages.CREATE + Messages.TABLE + tableName + " (";
 				// get all attribute objects from the java-class
 				final Field[] fieldlist = cls.getDeclaredFields();
 				for (final Field aFieldlist : fieldlist) {
@@ -126,7 +126,7 @@ public class TableServiceImp extends TableUtilities implements ITableService {
 		try {
 			final Statement s = con.createStatement();
 			if (tableExists(pPath, pDbName, pTableName)) {
-				final String sqlStatement = "DROP TABLE " + pTableName + ";";
+				final String sqlStatement = Messages.DROP + Messages.TABLE + pTableName + ";";
 				s.execute(sqlStatement);
 				System.out.println(Messages._TB_RM + pTableName);
 			} else {
@@ -155,8 +155,8 @@ public class TableServiceImp extends TableUtilities implements ITableService {
 			if (tableExists(pPath, pDbName, pTableName)) {
 				if (!tableExists(pPath, pDbName, pNewTableName)) {
 					if (!pTableName.equals(pNewTableName)) {
-						final String sqlStatement = "ALTER TABLE " + pTableName + " " + "RENAME TO " + pNewTableName
-								+ ";";
+						final String sqlStatement = Messages.ALTER + Messages.TABLE + pTableName + Messages.RENAME
+								+ Messages._TO + pNewTableName + ";";
 						s.execute(sqlStatement);
 						System.out.println(Messages._TB_RN_SUCC + pTableName + Messages._TO + pNewTableName);
 					}
@@ -191,8 +191,8 @@ public class TableServiceImp extends TableUtilities implements ITableService {
 				for (Column c : attributes) {
 					if (!columnExists(pPath, pDbName, pTableName, c.getName())) {
 						try {
-							final String sqlStatement = "ALTER TABLE " + pTableName + " ADD " + c.getName() + " "
-									+ c.getType() + ";";
+							final String sqlStatement = Messages.ALTER + Messages.TABLE + pTableName + Messages.ADD
+									+ c.getName() + " " + c.getType() + ";";
 							stmt.execute(sqlStatement);
 							if (c.isNotNull()) {
 								switchColumnNotNull(pPath, pDbName, pTableName, true, c.getName());
@@ -206,7 +206,7 @@ public class TableServiceImp extends TableUtilities implements ITableService {
 							if (c.isAutoIncrement()) {
 								switchColumnAutoIncrement(pPath, pDbName, pTableName, true, c.getName());
 							}
-							System.out.println("Column " + c.getName() + " added to table: " + pTableName);
+							System.out.println(Messages._CLM_ADD_SUCC + c.getName());
 						} catch (Exception e) {
 							System.err.println(Messages._ER_AD_CLM + c.getName() + ". " + e.getMessage());
 						}
@@ -242,15 +242,15 @@ public class TableServiceImp extends TableUtilities implements ITableService {
 			if (tableExists(pPath, pDbName, pTableName)) {
 				if (!columnExists(pPath, pDbName, pTableName, pNewColumnName)) {
 					if (columnExists(pPath, pDbName, pTableName, pColumnName)) {
-						final String sqlStatement = "ALTER TABLE " + pTableName + " RENAME COLUMN " + pColumnName
-								+ " TO " + pNewColumnName + ";";
+						final String sqlStatement = Messages.ALTER + Messages.TABLE + pTableName + Messages.RENAME
+								+ Messages.COLUMN + pColumnName + Messages._TO + pNewColumnName + ";";
 						s.execute(sqlStatement);
-						System.out.println("Column renamed from " + pColumnName + " to " + pNewColumnName);
+						System.out.println(Messages._CLM_RN_FR_TO + pColumnName + Messages._TO + pNewColumnName);
 					} else {
 						System.out.println(Messages._CLM_NO_EX + pColumnName);
 					}
 				} else {
-					System.out.println("Can not rename with an existing columnname " + pNewColumnName + ".");
+					System.out.println(Messages._ERR_CLM_RN_EX_NM + pNewColumnName + ".");
 				}
 			} else {
 				System.out.println(Messages._TB_NO_EX + pTableName);
