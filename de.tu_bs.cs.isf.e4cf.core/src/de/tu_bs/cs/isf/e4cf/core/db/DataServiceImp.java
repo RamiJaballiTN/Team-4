@@ -64,9 +64,11 @@ public class DataServiceImp extends DataUtilities implements IDataService {
 			ColumnValue... data) {
 		try {
 			String sqlStatement = Messages.UPDATE + pTableName + Messages.SET;
+			// preparing the columns and their data for the sql statement
 			for (final ColumnValue c : data) {
 				sqlStatement += c.getColumnName() + " = " + "'" + c.getValue() + "', ";
 			}
+			// delete the last commas
 			sqlStatement = sqlStatement.substring(0, sqlStatement.length() - 2);
 			sqlStatement += condition.getConditionAsSql();
 			executeStatement(pPath, pDbName, sqlStatement);
@@ -108,7 +110,6 @@ public class DataServiceImp extends DataUtilities implements IDataService {
 	public ResultSet selectData(final String pPath, final String pDbName, final String pTableName, Condition condition,
 			Sorter sorting, final String... attributes) {
 		final Connection con = DatabaseFactory.getInstance().getDatabase(pPath, pDbName);
-		// System.out.println("Test Select: " + sqlStatement);
 		ResultSet rs = null;
 		try {
 			final Statement stm = con.createStatement();
@@ -153,32 +154,7 @@ public class DataServiceImp extends DataUtilities implements IDataService {
 	@Override
 	public long count(final String pPath, final String pDbName, final String pTableName, Condition condition,
 			Sorter sorting, final String attributes, final boolean distinct) {
-		long countResult = 0;
-		try {
-			final Connection con = DatabaseFactory.getInstance().getDatabase(pPath, pDbName);
-			final Statement stm = con.createStatement();
-			String sqlStatement = "";
-			String conditionsAsSql = "", sortingsAsSql = "";
-			if (null != condition) {
-				conditionsAsSql = condition.getConditionAsSql();
-			}
-			if (null != sorting) {
-				sortingsAsSql = sorting.getSortingAsSql();
-			}
-			sqlStatement = Messages.SELECT + Messages.COUNT + " ( ";
-			if (distinct) {
-				sqlStatement += Messages.DISTINCT;
-			}
-			sqlStatement += attributes + ") " + Messages.AS + attributes + "_num" + Messages.FROM + pTableName + " "
-					+ conditionsAsSql + sortingsAsSql;
-
-			ResultSet rs = stm.executeQuery(sqlStatement);
-			countResult = rs.getLong(attributes + "_num");
-			con.close();
-		} catch (SQLException e) {
-			System.err.println(Messages._ER_CNT + e.getMessage());
-		}
-		return countResult;
+		return getNumberSqlStqtement(pPath, pDbName, pTableName, Messages.COUNT, condition, sorting, attributes, distinct);
 	}
 
 	/**
@@ -195,6 +171,24 @@ public class DataServiceImp extends DataUtilities implements IDataService {
 	 */
 	public long sum(final String pPath, final String pDbName, final String pTableName, Condition condition,
 			Sorter sorting, final String attributes, final boolean distinct) {
+		return getNumberSqlStqtement(pPath, pDbName, pTableName, Messages.SUM, condition, sorting, attributes, distinct);
+	}
+	
+	/**
+	 * Method to retrieve a number from an sql statement such as sum or count.
+	 * 
+	 * @param pPath
+	 * @param pDbName
+	 * @param pTableName
+	 * @param sqlAction
+	 * @param condition
+	 * @param sorting
+	 * @param attributes
+	 * @param distinct
+	 * @return
+	 */
+	protected long getNumberSqlStqtement(final String pPath, final String pDbName, final String pTableName, final String sqlAction, Condition condition,
+			Sorter sorting, final String attributes, final boolean distinct) {
 		long resultSum = -1;
 		try {
 			final Connection con = DatabaseFactory.getInstance().getDatabase(pPath, pDbName);
@@ -207,7 +201,7 @@ public class DataServiceImp extends DataUtilities implements IDataService {
 			if (null != sorting) {
 				sortingsAsSql = sorting.getSortingAsSql();
 			}
-			sqlStatement = Messages.SELECT + Messages.SUM + " ( ";
+			sqlStatement = Messages.SELECT + sqlAction + " ( ";
 			if (distinct) {
 				sqlStatement += Messages.DISTINCT;
 			}
@@ -218,7 +212,11 @@ public class DataServiceImp extends DataUtilities implements IDataService {
 			resultSum = rs.getLong(attributes + "_num");
 			con.close();
 		} catch (SQLException e) {
-			System.err.println(Messages._ER_SUM + e.getMessage());
+			if(Messages.SUM.equals(sqlAction)) {
+				System.err.println(Messages._ER_SUM + e.getMessage());
+			}else {
+				System.err.println(Messages._ER_CNT + e.getMessage());
+			}
 		}
 		return resultSum;
 	}

@@ -89,6 +89,12 @@ public final class DatabaseView extends Application {
 		stage.show();
 	}
 
+	/**
+	 * 
+	 * 
+	 * @param folder
+	 * @return
+	 */
 	protected List<String> getFiles(final File folder) {
 		List<String> files = new ArrayList<String>();
 
@@ -102,6 +108,12 @@ public final class DatabaseView extends Application {
 		return files;
 	}
 
+	/**
+	 * 
+	 * 
+	 * @param file
+	 * @param stage
+	 */
 	protected void selectTable(File file, Stage stage) {
 
 		List<String> tableList = new ArrayList<String>();
@@ -157,6 +169,11 @@ public final class DatabaseView extends Application {
 		}
 	}
 
+	/**
+	 * 
+	 * @param file
+	 * @param tableName
+	 */
 	protected void showTable(File file, String tableName) {
 		try {
 			TableServiceImp tI = new TableServiceImp();
@@ -221,6 +238,14 @@ public final class DatabaseView extends Application {
 		}
 	}
 
+	/**
+	 * 
+	 * @param pPath
+	 * @param pDbName
+	 * @param pTableName
+	 * @return
+	 * @throws SQLException
+	 */
 	protected ResultSet getDataTable(final String pPath, final String pDbName, final String pTableName)
 			throws SQLException {
 		final Connection con = DatabaseFactory.getInstance().getDatabase(pPath, pDbName);

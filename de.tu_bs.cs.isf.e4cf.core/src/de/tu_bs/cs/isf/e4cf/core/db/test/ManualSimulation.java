@@ -73,10 +73,10 @@ public class ManualSimulation {
 
 		DataServiceImp ds = new DataServiceImp();
 		
-		ColumnValue value_1 = new ColumnValue("name", new String("Isy Pzz"));
+		ColumnValue value_1 = new ColumnValue("name", new String("Isy P"));
 		ColumnValue value_2 = new ColumnValue("age", 44);
 
-		ColumnValue value_3 = new ColumnValue(column_2 .getName(), "Rami .");
+		ColumnValue value_3 = new ColumnValue(column_2 .getName(), "Rami J");
 		ColumnValue value_4 = new ColumnValue(column_3.getName(), 24);
 
 		//ds.insertData(_DATABASEPATH, _DATABASENAME, _TABLEENAME, value_1, value_2);
@@ -106,7 +106,7 @@ public class ManualSimulation {
 
 		//ds.printTable(_DATABASEPATH, _DATABASENAME, _TABLEENAME);
 		
-		System.out.println(ds.count(_DATABASEPATH, _DATABASENAME, _TABLEENAME, null, null, "age", true));
+		System.out.println(ds.count(_DATABASEPATH, _DATABASENAME, _TABLEENAME, null, null, "age", false));
 	}
 
 }
